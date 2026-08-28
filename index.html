@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#07111d"><meta name="description" content="Bảng giảng dạy, ghi hình và lưu Google Drive trên trình duyệt.">
+  <link rel="manifest" href="/manifest.webmanifest"><link rel="stylesheet" href="/styles.css">
+  <title>Sam Teaching Visual</title>
+</head>
+<body>
+<header class="topbar"><div class="brand"><b>S</b><div><h1>Sam Teaching Visual</h1><p>Vẽ • Trình chiếu • Ghi hình • Lưu Drive</p></div></div><div class="head-actions"><span id="saveState">Đã lưu cục bộ</span><button id="newSessionBtn">Phiên mới</button><button id="fullscreenBtn">Toàn màn hình</button><button id="driveConnectBtn" class="drive">Kết nối Google Drive</button></div></header>
+<main class="layout">
+<section class="workspace">
+  <div class="session"><label>Tên buổi học<input id="sessionTitle" value="Buổi học thực chiến cùng Sam Nguyễn" maxlength="120"></label><span id="sessionState">Sẵn sàng</span><small id="storageEstimate">IndexedDB</small></div>
+  <div class="toolbar" id="toolButtons">
+    <button data-tool="pen" class="active">Bút</button><button data-tool="highlighter">Dạ quang</button><button data-tool="eraser">Tẩy</button><button data-tool="line">Đường</button><button data-tool="arrow">Mũi tên</button><button data-tool="rect">Khung</button><button data-tool="text">Chữ</button>
+    <label>Màu <input id="strokeColor" type="color" value="#ffd43b"></label><label>Nét <input id="strokeWidth" type="range" min="2" max="32" value="8"></label>
+    <button id="undoBtn">↶</button><button id="redoBtn">↷</button><button id="clearBtn">Xóa bảng</button>
+  </div>
+  <div id="stageFrame" class="stage-frame"><div id="stage" class="stage">
+    <div id="emptyStage" class="empty"><h2>Sẵn sàng bắt đầu bài giảng</h2><p>Thêm ảnh/video hoặc vẽ trực tiếp trên bảng 16:9.</p><button id="emptyAddMediaBtn" class="primary">Thêm hình ảnh hoặc video</button></div>
+    <img id="mediaImage" alt="Nội dung bài giảng" hidden><video id="mediaVideo" playsinline preload="metadata" hidden></video>
+    <canvas id="drawingCanvas" width="1600" height="900"></canvas><video id="webcamPreview" class="webcam" playsinline muted hidden></video><canvas id="compositeCanvas" width="1600" height="900" hidden></canvas>
+    <div id="recordingBadge" class="recording" hidden><i></i> ĐANG GHI</div>
+  </div></div>
+  <div class="media"><input id="mediaInput" type="file" accept="image/*,video/*" hidden><button id="addMediaBtn">Thêm ảnh / video</button><button id="removeMediaBtn" disabled>Gỡ nội dung</button><button id="mediaPlayBtn" disabled>Phát</button><input id="mediaSeek" type="range" min="0" max="1000" value="0" disabled><span id="mediaTime">00:00 / 00:00</span></div>
+  <div class="record-dock"><div class="record-main"><button id="recordBtn" class="record-btn">● Bắt đầu ghi</button><button id="pauseBtn" disabled>Tạm dừng</button><button id="stopBtn" disabled>Dừng & lưu</button><strong id="recordTimer">00:00</strong><small id="recordSize">0 B</small></div><div class="options">
+    <label>Nguồn hình<select id="recordSource"><option value="studio">Bảng giảng dạy 16:9</option><option value="screen">Màn hình / cửa sổ / tab</option></select></label>
+    <label>Chất lượng<select id="qualitySelect"><option value="720p">720p</option><option value="1080p" selected>1080p</option><option value="1080p-high">1080p60</option></select></label>
+    <label><input id="micToggle" type="checkbox" checked> Micro</label><label><input id="systemAudioToggle" type="checkbox" checked> Âm thanh tab</label><label><input id="webcamToggle" type="checkbox" checked> Webcam</label>
+  </div></div>
+</section>
+<aside>
+  <section class="panel"><div class="panel-title"><div><h2>Dấu mốc hậu kỳ</h2><p>Đánh dấu ngay trong lúc dạy.</p></div><b id="markerCount">0</b></div><div class="markers"><button data-marker="chapter">Chương mới</button><button data-marker="important">Quan trọng</button><button data-marker="practice">Thực hành</button><button data-marker="cut">Cắt lỗi</button><button data-marker="cta">CTA</button></div><div id="markerList" class="marker-list"><p>Chưa có dấu mốc.</p></div></section>
+  <section class="panel"><div class="panel-title"><div><h2>Tệp buổi học</h2><p>Khôi phục, tải về hoặc đưa lên Drive.</p></div></div><div class="file-states"><span>Video <b id="videoFileState">Chưa ghi</b></span><span>Bảng vẽ <b id="sceneFileState">Tự lưu</b></span><span>Manifest <b id="manifestFileState">Sẵn sàng</b></span></div><button id="recoverBtn" class="wide">Khôi phục bản ghi cục bộ</button><button id="downloadVideoBtn" class="wide" disabled>Tải video về máy</button><button id="downloadPackageBtn" class="wide">Tải scene + manifest + render plan</button><button id="uploadDriveBtn" class="wide drive" disabled>Lưu toàn bộ lên Google Drive</button><div id="uploadProgressWrap" class="progress" hidden><i id="uploadProgress"></i><span id="uploadProgressText">0%</span></div></section>
+  <section class="panel"><details><summary>Cấu hình Google Drive</summary><label>OAuth Web Client ID<input id="googleClientId" placeholder="xxxx.apps.googleusercontent.com"></label><p>Chỉ dùng Client ID. Không nhập Client Secret hoặc access token.</p><button id="saveClientIdBtn" class="wide">Lưu Client ID</button></details></section>
+</aside>
+</main>
+<div id="toastRegion" class="toasts" aria-live="polite"></div>
+<script src="https://accounts.google.com/gsi/client" async defer></script><script src="/config.js"></script><script type="module" src="/app.mjs"></script>
+</body></html>
