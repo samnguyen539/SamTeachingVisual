@@ -1,0 +1,10 @@
+{
+  "name": "Sam Teaching Visual",
+  "short_name": "Sam Visual",
+  "description": "Bảng giảng dạy, ghi hình và lưu Google Drive trên trình duyệt.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07111d",
+  "theme_color": "#07111d",
+  "icons": [{"src":"/icons/app-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
