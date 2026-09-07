@@ -1,0 +1,27 @@
+[Unit]
+Description=Sam Teaching Visual static server (day.samnguyenphoto.com)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/srv/day.samnguyenphoto.com
+Environment=PORT=4890
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node scripts/serve.mjs --dist
+Restart=always
+RestartSec=3
+
+# Hardening / sandbox
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/srv/day.samnguyenphoto.com
+
+# Logging
+StandardOutput=append:/var/log/sam-teaching-visual-day.log
+StandardError=append:/var/log/sam-teaching-visual-day.log
+
+[Install]
+WantedBy=multi-user.target

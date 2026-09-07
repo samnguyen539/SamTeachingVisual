@@ -1,10 +1,12 @@
 import { STUDIO_WIDTH, STUDIO_HEIGHT, mapClientPoint } from "../core.mjs";
 
 export class DrawingBoard {
-  constructor(canvas, onChange) {
+  constructor(canvas, onChange, options = {}) {
     this.canvas = canvas;
     this.context = canvas.getContext("2d", { alpha: true });
     this.onChange = onChange;
+    this.boardWidth = Math.max(1, Number(options?.width) || STUDIO_WIDTH);
+    this.boardHeight = Math.max(1, Number(options?.height) || STUDIO_HEIGHT);
     this.tool = "pen";
     this.color = "#ffd43b";
     this.width = 8;
@@ -24,7 +26,7 @@ export class DrawingBoard {
   }
 
   point(event) {
-    return mapClientPoint(event.clientX, event.clientY, this.canvas.getBoundingClientRect(), STUDIO_WIDTH, STUDIO_HEIGHT);
+    return mapClientPoint(event.clientX, event.clientY, this.canvas.getBoundingClientRect(), this.boardWidth, this.boardHeight);
   }
 
   pointerDown(event) {
@@ -100,6 +102,13 @@ export class DrawingBoard {
 
   setColor(color) { this.color = color; }
   setWidth(width) { this.width = Number(width) || 8; }
+  setSize(width, height) {
+    this.boardWidth = Math.max(1, Number(width) || this.boardWidth);
+    this.boardHeight = Math.max(1, Number(height) || this.boardHeight);
+    this.canvas.width = this.boardWidth;
+    this.canvas.height = this.boardHeight;
+    this.render();
+  }
 
   eraseAt(point) {
     const radius = Math.max(22, this.width * 2.2);
@@ -148,8 +157,8 @@ export class DrawingBoard {
   exportScene() {
     return {
       schemaVersion: 1,
-      width: STUDIO_WIDTH,
-      height: STUDIO_HEIGHT,
+      width: this.boardWidth,
+      height: this.boardHeight,
       items: structuredClone(this.items)
     };
   }

@@ -1,0 +1,313 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  overscroll-behavior: none;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+  color: #f3f4f6;
+  -webkit-font-smoothing: antialiased;
+}
+
+#boardCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  background: #000;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+#boardHint {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 8px 16px;
+  background: rgba(20, 20, 24, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  color: #e5e7eb;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 5;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  animation: fadeOutHint 6s forwards;
+}
+
+@keyframes fadeOutHint {
+  0%, 70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+#boardToolbar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(20, 20, 22, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  max-width: calc(100vw - 24px);
+  overflow-x: auto;
+  scrollbar-width: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#boardToolbar::-webkit-scrollbar {
+  display: none;
+}
+
+#boardToolbar.ui-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 120%);
+}
+
+#boardHint.ui-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+}
+
+.tool-btn,
+.action-btn {
+  height: 40px;
+  min-width: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f3f4f6;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  user-select: none;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.tool-btn:hover,
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.tool-btn:active,
+.action-btn:active {
+  transform: scale(0.97);
+}
+
+.tool-btn.active {
+  background: rgba(255, 255, 255, 0.24);
+  border-color: #ffffff;
+  color: #ffffff;
+  box-shadow: 0 0 0 1px #ffffff;
+}
+
+.swatches {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+}
+
+.swatch {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--swatch-color, #ffffff);
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.swatch:hover {
+  transform: scale(1.1);
+}
+
+.swatch.active {
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3px rgba(0, 0, 0, 0.8);
+  transform: scale(1.05);
+}
+
+.width-label {
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+}
+
+#widthRange {
+  width: 80px;
+  height: 6px;
+  accent-color: #ffd43b;
+  cursor: pointer;
+}
+
+.studio-link {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: transparent;
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.studio-link:hover {
+  color: #f3f4f6;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.restore-btn {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(20, 20, 22, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 11;
+  opacity: 0.35;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.restore-btn:hover,
+.restore-btn:focus-visible {
+  opacity: 0.85;
+}
+
+.restore-btn.ui-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.8);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 720px) {
+  #boardHint {
+    width: calc(100vw - 28px);
+    max-width: calc(100vw - 28px);
+    white-space: normal;
+    text-align: center;
+    line-height: 1.35;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 12px;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  #boardHint.ui-hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -100%);
+  }
+  #boardToolbar {
+    width: calc(100vw - 20px);
+    max-width: calc(100vw - 20px);
+    flex-wrap: wrap;
+    justify-content: center;
+    overflow: visible;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 12px;
+    padding: 8px 6px;
+    gap: 6px;
+    row-gap: 6px;
+    column-gap: 6px;
+  }
+  #boardToolbar.ui-hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 120%);
+  }
+  .tool-btn,
+  .action-btn,
+  .studio-link {
+    height: 40px;
+    min-width: 36px;
+    padding: 0 8px;
+    font-size: 12px;
+  }
+
+  .swatches {
+    gap: 5px;
+    padding: 0 2px;
+  }
+
+  .swatch {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: 6px;
+  }
+
+  .width-label {
+    padding: 0 2px;
+  }
+
+  #widthRange {
+    width: 60px;
+  }
+}

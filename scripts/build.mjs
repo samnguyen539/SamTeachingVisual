@@ -1,9 +1,10 @@
 import { cp, mkdir, rm, stat } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = path.resolve(new URL("..", import.meta.url).pathname);
+const root = fileURLToPath(new URL("..", import.meta.url));
 const dist = path.join(root, "dist");
-const entries = ["index.html", "styles.css", "config.js", "core.mjs", "app.mjs", "src", "sw.js", "manifest.webmanifest", "icons"];
+const entries = ["index.html", "board.html", "board.css", "styles.css", "config.js", "core.mjs", "app.mjs", "src", "sw.js", "manifest.webmanifest", "icons"];
 await rm(dist, { recursive: true, force: true });
 await mkdir(dist, { recursive: true });
 for (const entry of entries) {

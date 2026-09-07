@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Bảng đen — Sam Teaching Visual</title>
+  <link rel="stylesheet" href="/board.css">
+  <script type="module" src="/src/board.mjs"></script>
+</head>
+<body>
+  <canvas id="boardCanvas"></canvas>
+
+  <p id="boardHint">Kéo chuột hoặc bút để viết • H: ẩn/hiện thanh công cụ • F: toàn màn hình • Ctrl+Z: hoàn tác</p>
+
+  <div id="boardToolbar" role="toolbar" aria-label="Thanh công cụ bảng đen">
+    <button type="button" id="penBtn" class="tool-btn active" aria-label="Bút viết" title="Bút (P)">Bút</button>
+    <button type="button" id="eraserBtn" class="tool-btn" aria-label="Tẩy xóa" title="Tẩy (E)">Tẩy</button>
+
+    <div id="colorSwatches" class="swatches" aria-label="Bảng màu nét vẽ">
+      <button type="button" class="swatch active" data-color="#ffffff" style="--swatch-color:#ffffff" aria-label="Màu trắng" title="Trắng"></button>
+      <button type="button" class="swatch" data-color="#ffd43b" style="--swatch-color:#ffd43b" aria-label="Màu vàng" title="Vàng"></button>
+      <button type="button" class="swatch" data-color="#4dd4ff" style="--swatch-color:#4dd4ff" aria-label="Màu xanh" title="Xanh"></button>
+      <button type="button" class="swatch" data-color="#ff6b6b" style="--swatch-color:#ff6b6b" aria-label="Màu đỏ" title="Đỏ"></button>
+      <button type="button" class="swatch" data-color="#69db7c" style="--swatch-color:#69db7c" aria-label="Màu lục" title="Lục"></button>
+      <button type="button" class="swatch" data-color="#c084fc" style="--swatch-color:#c084fc" aria-label="Màu tím" title="Tím"></button>
+    </div>
+
+    <label class="width-label" for="widthRange" title="Độ dày nét">
+      <span class="sr-only">Độ dày nét</span>
+      <input type="range" id="widthRange" min="2" max="40" value="6" aria-label="Độ dày nét">
+    </label>
+
+    <button type="button" id="undoBtn" class="action-btn" aria-label="Hoàn tác nét vẽ" title="Hoàn tác (Ctrl+Z)">Hoàn tác</button>
+    <button type="button" id="clearBtn" class="action-btn" aria-label="Xoá toàn bộ bảng" title="Xoá bảng">Xoá bảng</button>
+    <button type="button" id="saveImageBtn" class="action-btn" aria-label="Lưu ảnh bảng dưới dạng PNG" title="Lưu ảnh PNG">Lưu ảnh PNG</button>
+    <button type="button" id="fullscreenBtn" class="action-btn" aria-label="Toàn màn hình" title="Toàn màn hình (F)">Toàn màn hình</button>
+    <button type="button" id="hideUiBtn" class="action-btn" aria-label="Ẩn thanh công cụ" title="Ẩn thanh công cụ (H)">Ẩn thanh công cụ</button>
+
+    <a href="/studio" class="studio-link" title="Chuyển sang Studio ghi hình">Studio</a>
+  </div>
+
+  <button type="button" id="boardRestoreBtn" class="restore-btn ui-hidden" aria-label="Hiện lại thanh công cụ" title="Hiện thanh công cụ (H)">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="m18 15-6-6-6 6"/>
+    </svg>
+  </button>
+</body>
+</html>

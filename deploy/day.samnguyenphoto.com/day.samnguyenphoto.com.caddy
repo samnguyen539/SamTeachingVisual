@@ -1,0 +1,20 @@
+http://day.samnguyenphoto.com {
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	rewrite / /board.html
+	rewrite /bang-den /board.html
+	rewrite /studio /index.html
+
+	reverse_proxy 172.17.0.1:4890
+
+	log {
+		output file /var/log/caddy/day.samnguyenphoto.com-access.log
+		format json
+	}
+}
