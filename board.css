@@ -89,7 +89,11 @@ html, body {
 }
 
 #boardHint.ui-hidden {
+  /* Animation thắng khai báo thường, nên không tắt `animation` thì `opacity: 0`
+     ở đây vô hiệu và dòng gợi ý vẫn hiện khi đã ẩn UI. Đo được 0.55 trên UI thật. */
+  animation: none;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
   transform: translate(-50%, -100%);
 }
@@ -203,32 +207,368 @@ html, body {
   position: fixed;
   bottom: 16px;
   right: 16px;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  height: 40px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
   background: rgba(20, 20, 22, 0.85);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: #f3f4f6;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   z-index: 11;
-  opacity: 0.35;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  opacity: 0.8;
+  transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 
 .restore-btn:hover,
 .restore-btn:focus-visible {
-  opacity: 0.85;
+  opacity: 1;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Sam từng không tìm ra cách mở lại thanh công cụ, nên lúc pill vừa xuất hiện
+   cho nó nháy viền 3 nhịp. Chỉ chạm box-shadow/border, KHÔNG chạm opacity —
+   test UI đo opacity của nút này. */
+.restore-btn:not(.ui-hidden) {
+  animation: nhayNutMoLai 1.1s ease-out 3;
+}
+
+@keyframes nhayNutMoLai {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 212, 59, 0);
+    border-color: rgba(255, 255, 255, 0.35);
+  }
+  45% {
+    box-shadow: 0 0 0 8px rgba(255, 212, 59, 0.22);
+    border-color: rgba(255, 212, 59, 0.85);
+  }
 }
 
 .restore-btn.ui-hidden {
   opacity: 0;
   pointer-events: none;
-  transform: scale(0.8);
+  transform: scale(0.9);
+}
+
+.restore-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.restore-text {
+  white-space: nowrap;
+}
+
+.page-bar {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(20, 20, 22, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 9999px;
+  padding: 4px 8px;
+  z-index: 12;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  color: #f3f4f6;
+}
+
+.page-bar.ui-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-100%);
+}
+
+.page-btn {
+  height: 32px;
+  min-width: 32px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f3f4f6;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease, border-color 0.15s ease;
+}
+
+.page-btn:hover:not(:disabled),
+.page-btn:focus-visible:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.page-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.page-label {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 0 6px;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.page-btn.add-btn {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.page-btn.pages-btn {
+  padding: 0 10px;
+}
+
+.page-overview {
+  position: fixed;
+  inset: 0;
+  /* .92 vẫn để lộ nét vẽ và thanh công cụ phía sau — đo trên ảnh chụp thật. */
+  background: rgba(0, 0, 0, 0.97);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  overflow-y: auto;
+  color: #f3f4f6;
+}
+
+.page-overview.ui-hidden {
+  display: none;
+}
+
+.overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto 20px;
+}
+
+.overview-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.overview-close-btn {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.overview-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.page-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.page-card:hover {
+  border-color: #4dd4ff;
+  transform: translateY(-2px);
+}
+
+.page-card.active {
+  border-color: #ffd43b;
+  box-shadow: 0 0 0 1px #ffd43b;
+}
+
+.card-thumb-wrap {
+  width: 100%;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-thumb {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.card-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.card-title {
+  font-weight: 600;
+  color: #fff;
+}
+
+.card-subtitle {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.card-delete-btn {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 107, 107, 0.4);
+  background: rgba(255, 107, 107, 0.15);
+  color: #ff8787;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.card-delete-btn:hover {
+  background: rgba(255, 107, 107, 0.3);
+}
+
+.board-toast {
+  position: fixed;
+  /* Toolbar cao ~48px và cách đáy 20px; để 24px là toast đè lên chính các nút
+     vừa bấm — đo được trên ảnh chụp thật. */
+  bottom: 88px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 20, 24, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #f3f4f6;
+  z-index: 60;
+  max-width: min(90vw, 640px);
+  font-size: 13px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.board-toast.ui-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 20px);
+}
+
+.board-toast.toast-error {
+  border-color: rgba(255, 107, 107, 0.6);
+  background: rgba(40, 16, 16, 0.95);
+}
+
+@media (max-width: 720px) {
+  .board-toast {
+    /* Thanh công cụ trên điện thoại xếp 3 hàng nên phải nhấc toast lên cao hơn. */
+    bottom: 180px;
+    max-width: calc(100vw - 24px);
+  }
+}
+
+.toast-message {
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.toast-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.toast-link {
+  color: #4dd4ff;
+  text-decoration: underline;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.toast-link:hover {
+  color: #8be0ff;
+}
+
+.toast-btn {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.toast-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.toast-close-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-close-btn:hover {
+  color: #fff;
 }
 
 .sr-only {
@@ -253,12 +593,16 @@ html, body {
     font-size: 12px;
     padding: 6px 12px;
     border-radius: 12px;
-    top: 12px;
+    /* Thanh trang cũng nằm ở đỉnh phải; để 12px là hai cái đè lên nhau và
+       chữ gợi ý bị thanh trang che — đo được trên ảnh chụp 390x844. */
+    top: 56px;
     left: 50%;
     transform: translateX(-50%);
   }
   #boardHint.ui-hidden {
+    animation: none;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
     transform: translate(-50%, -100%);
   }
@@ -309,5 +653,36 @@ html, body {
 
   #widthRange {
     width: 60px;
+  }
+
+  .restore-btn {
+    padding: 0 12px;
+    height: 40px;
+    min-width: 40px;
+    justify-content: center;
+  }
+  .restore-text {
+    display: none;
+  }
+  .page-bar {
+    top: 8px;
+    right: 8px;
+    gap: 4px;
+    padding: 3px 6px;
+  }
+  .page-btn {
+    /* 28px quá nhỏ để bấm bằng ngón tay — đo được trên 390x844 và bị chặn. */
+    height: 36px;
+    min-width: 36px;
+    padding: 0 8px;
+    font-size: 12px;
+  }
+  .page-label {
+    font-size: 12px;
+    padding: 0 3px;
+  }
+  .overview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
   }
 }

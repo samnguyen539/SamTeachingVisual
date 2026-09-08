@@ -4,6 +4,54 @@ Nhật ký thực thi canonical của repo này. Mỗi thay đổi mã, cấu h�
 
 ---
 
+## 2026-09-08 07:20 → 08:00 (Asia/Bangkok)
+
+- **Trace-ID**: `20260908-0720-samteachingvisual-nhieutrang-drive`
+- **system_id**: `SamTeachingVisual`
+- **Request**: Sam báo ẩn thanh công cụ rồi không biết mở lại → cần nút nhỏ nhìn thấy rõ; thêm qua trang, xem lại các trang vẽ cũ; lưu toàn bộ các trang về một thư mục Drive `_VeBangDayHoc`. Giữa phiên Sam chỉ định thư mục cha bằng link: `1SLTqn92hitLfiDY_t5cWre6mlc-At3rC` (tên `@_Document`).
+- **Scope**: `board.html`, `board.css`, `src/board.mjs`, `scripts/check.mjs`, `scripts/serve.mjs`, `scripts/drive-upload.mjs` (mới), `scripts/api-luu-drive.mjs` (mới), `deploy/day.samnguyenphoto.com/**`, `tests/ui/capture-pages.mjs` (mới), `tests/ui/capture-board.mjs`.
+- **Branch**: `feat/bang-den` (tiếp tục, PR #2).
+
+### Actions
+
+1. Nút mở lại thanh công cụ: từ chevron `opacity .35` thành viên pill `☰ Hiện thanh công cụ`, `opacity .8`, 164×40, góc phải dưới. Ẩn UI giờ ẩn cả thanh trang và dòng gợi ý.
+2. Sổ nhiều trang trong `localStorage` key `sam-bang-den-so` (`schemaVersion 2`), tự di cư từ key cũ `sam-bang-den-scene` và **không xoá key cũ**. Thanh `#pageBar` góc phải trên: `‹ Trang N/M › + Các trang`; phím tắt `[ ] PageUp PageDown N`.
+3. Overlay `Danh sách các trang bảng`: thumbnail vẽ lại bằng chính `DrawingBoard` trên canvas tạm (không viết hàm vẽ thứ hai), nhãn số nét + giờ sửa, xoá từng trang (chặn khi còn 1 trang), `Đóng (Esc)`.
+4. Lưu Drive: `POST /api/luu-drive` trên chính node static server. `scripts/drive-upload.mjs` nói chuyện với Drive v3 **bằng `fetch` thuần, không thư viện** — đổi `refresh_token` → `access_token` (cache trong tiến trình), tìm/tạo thư mục con `_VeBangDayHoc` **trong** `SAM_DRIVE_PARENT`, idempotent theo tên + size + md5 (`tai_su_dung` / `cap_nhat` đè tại chỗ / `da_tai_len`), đọc ngược `files.get` kiểm chứng, không bao giờ gọi Permissions API tạo link public. Giới hạn 60 file · 8 MB/file · 40 MB body. Credential đọc từ biến môi trường, thiếu → `503 THIEU_CREDENTIAL` và UI đổi sang "Tải tất cả về máy".
+
+### Năm lỗi tìm ra bằng ảnh UI thật rồi sửa
+
+| Lỗi | Bằng chứng đo được | Sửa |
+|---|---|---|
+| Nút trên thanh trang chỉ cao `28px` trên mobile 390 — quá nhỏ để bấm | `smallestControlHeight: 28` | `.page-btn` mobile lên `36px` |
+| Overlay danh sách trang để lộ nét vẽ và thanh công cụ phía sau | ảnh `04` vòng 1, `background: rgba(0,0,0,.92)` | `.97` + `backdrop-filter: blur(10px)` + ẩn chrome khi overlay mở |
+| Ẩn UI mà dòng gợi ý vẫn hiện `opacity .55` | CSS animation `fadeOutHint` thắng khai báo thường nên `.ui-hidden { opacity: 0 }` vô hiệu | thêm `animation: none` + `visibility: hidden` vào `#boardHint.ui-hidden` |
+| Thông báo lưu Drive **che chính các nút** trong thanh công cụ | ảnh `09` vòng 1 | toast `bottom: 88px` (desktop) / `180px` (mobile) |
+| Mobile 390: thanh trang đè lên dòng gợi ý, chữ bị che | ảnh `09` vòng 1 | hint mobile `top: 56px` |
+
+### Verify
+
+- `npm run check` PASS (lint + 23 test + build).
+- `deploy.sh` 6/6 cổng smoke `200`/`400`: port 4890 · **`POST /api/luu-drive` với `{"files":[]}` → 400** (chứng minh route sống, không ghi Drive) · Host-header `/`, `/bang-den`, `/studio` qua Caddy · `https://day.samnguyenphoto.com/`.
+- `node tests/ui/capture-pages.mjs https://day.samnguyenphoto.com … --drive` **PASS** 9 ảnh: `Trang 1/1` → `+` → `Trang 2/2` với canvas trắng (`lit 0`) → vẽ → `‹` về `Trang 1/2` nét cũ khôi phục (`6297 → 6292`) → overlay 2 thumbnail đều có nét → bấm thumbnail mở `Trang 2/2` (`lit 6159`) → ẩn UI (`toolbar/pageBar/hint = 0`, nút mở lại `opacity .8` `164×40` chữ `☰ Hiện thanh công cụ`) → mở lại (`opacity 1`) → tải lại vẫn `Trang 2/2` → toast `Đã lưu 2 trang lên Google Drive thành công!` + link, `overlapToolbarPx 0`.
+- `node tests/ui/capture-board.mjs …` **PASS** 11 ảnh (hồi quy bản cũ, thêm kiểm thanh trang: `pageBarHiddenOverflow 0`, `pageBarInside true`, `hintPageBarOverlapPx 0`, nút thấp nhất `36px`).
+- Kiểm chứng Drive thật bằng API từ VPS: thư mục `_VeBangDayHoc` id `1w58Se-SED0kL-9qjDWR_grV7gJsRNU-j`, cha là `@_Document` id `1SLTqn92hitLfiDY_t5cWre6mlc-At3rC`, PNG có `size` + `md5Checksum`, `permissions` chỉ có `{type: user, role: owner}` → **riêng tư, không có link public**.
+- Coordinator tự mở xem ảnh `04`, `06`, `09` của cả hai bộ.
+
+### Decision
+
+- Upload đi qua **máy chủ** dùng credential có sẵn trên VPS (`google-token.json` của `tuvan@samnguyenphoto.com`, scope `drive`) thay vì OAuth trong trình duyệt — Sam không phải nhập Client ID, không phải cấp quyền mỗi máy.
+- Thư mục đích do **máy chủ** quyết (`SAM_DRIVE_PARENT` + `SAM_DRIVE_FOLDER`); client không được chọn thư mục. Thiếu biến môi trường thì fail-closed, không lặng lẽ ghi vào gốc Drive.
+- `src/board.mjs` 615 dòng và `board.css` ~670 dòng, vượt hướng dẫn ~150 dòng/file của dự án. Ghi nhận là nợ kỹ thuật có chủ ý: tách module sau khi trạng thái đang xanh được Sam duyệt, không refactor chung một phiên với thay đổi hành vi.
+
+### Next
+
+- 11 file PNG thử nghiệm do các vòng verify sinh ra đang nằm trong `_VeBangDayHoc` — **không tự xoá** (luật backup trước khi xoá + đó là dữ liệu trên Drive của Sam). Sam xoá tay nếu muốn.
+- Tách `src/board.mjs` / `board.css` thành module nhỏ.
+- Chưa kiểm màn HiDPI thật (CDP override `deviceScaleFactor = 1`), chưa kiểm bút cảm ứng vật lý, chưa kiểm toast trên mobile thật (chỉ đặt CSS theo số đo desktop).
+
+---
+
 ## 2026-09-07 21:29 → 22:05 (Asia/Bangkok)
 
 - **Trace-ID**: `20260907-2135-samteachingvisual-bangden`

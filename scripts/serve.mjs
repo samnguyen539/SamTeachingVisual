@@ -1,6 +1,7 @@
 import http from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
+import { xuLyLuuDrive } from "./api-luu-drive.mjs";
 
 const root = path.resolve(process.cwd(), process.argv.includes("--dist") ? "dist" : ".");
 const port = Number(process.env.PORT || 4173);
@@ -16,7 +17,10 @@ const mime = {
 
 const server = http.createServer(async (request, response) => {
   try {
-    const url = new URL(request.url, `http://${request.headers.host}`);
+    const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
+    if (url.pathname === "/api/luu-drive") {
+      return await xuLyLuuDrive(request, response);
+    }
     let file = path.join(root, decodeURIComponent(url.pathname));
     if (url.pathname === "/") file = path.join(root, "index.html");
     try {

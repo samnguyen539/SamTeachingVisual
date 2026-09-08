@@ -1,6 +1,6 @@
 {
   "base": "https://day.samnguyenphoto.com",
-  "capturedAt": "2026-09-07T14:45:39.006Z",
+  "capturedAt": "2026-09-08T00:54:36.894Z",
   "problems": [],
   "measurements": {
     "rootInfo": {
@@ -32,7 +32,7 @@
       "opacity": "0",
       "pointerEvents": "none",
       "hasRestore": true,
-      "restoreOpacity": "0.35"
+      "restoreOpacity": "0.8"
     },
     "mobile": {
       "canvasCss": "390x844",
@@ -41,6 +41,9 @@
       "toolbarBottomGap": 12,
       "toolbarHiddenOverflow": 0,
       "hintHiddenOverflow": 0,
+      "pageBarHiddenOverflow": 0,
+      "pageBarInside": true,
+      "hintPageBarOverlapPx": 0,
       "offscreenControls": [],
       "smallestControlHeight": 32
     },
@@ -56,77 +59,77 @@
   "shots": [
     {
       "file": "01-desktop-bang-den-trong.png",
-      "capturedAt": "2026-09-07T14:45:08.140Z",
+      "capturedAt": "2026-09-08T00:54:28.104Z",
       "url": "https://day.samnguyenphoto.com/",
       "viewport": "1440x900",
       "expected": "Bảng đen trống, nền đen rgb(0, 0, 0), thanh công cụ hiện"
     },
     {
       "file": "02-desktop-net-trang.png",
-      "capturedAt": "2026-09-07T14:45:09.238Z",
+      "capturedAt": "2026-09-08T00:54:29.205Z",
       "url": "https://day.samnguyenphoto.com/",
       "viewport": "1440x900",
       "expected": "Hai nét trắng đã vẽ, pixel sáng 0 -> 11798"
     },
     {
       "file": "03-desktop-doi-mau-net-day.png",
-      "capturedAt": "2026-09-07T14:45:10.084Z",
+      "capturedAt": "2026-09-08T00:54:30.075Z",
       "url": "https://day.samnguyenphoto.com/",
       "viewport": "1440x900",
       "expected": "Nét thứ ba màu vàng nét dày, pixel đo được rgb(255,212,58)"
     },
     {
       "file": "04-desktop-hoan-tac.png",
-      "capturedAt": "2026-09-07T14:45:10.373Z",
+      "capturedAt": "2026-09-08T00:54:30.367Z",
       "url": "https://day.samnguyenphoto.com/",
       "viewport": "1440x900",
       "expected": "Hoàn tác bỏ nét vàng, còn 2 nét trắng, pixel sáng 11787"
     },
     {
       "file": "05-desktop-an-thanh-cong-cu.png",
-      "capturedAt": "2026-09-07T14:45:10.916Z",
+      "capturedAt": "2026-09-08T00:54:30.883Z",
       "url": "https://day.samnguyenphoto.com/",
       "viewport": "1440x900",
       "expected": "Thanh công cụ đã ẩn, chỉ còn nét vẽ trên nền đen"
     },
     {
       "file": "06-desktop-mo-lai-thanh-cong-cu.png",
-      "capturedAt": "2026-09-07T14:45:11.471Z",
+      "capturedAt": "2026-09-08T00:54:31.425Z",
       "url": "https://day.samnguyenphoto.com/",
       "viewport": "1440x900",
       "expected": "Thanh công cụ hiện lại, opacity=1"
     },
     {
       "file": "07-route-bang-den.png",
-      "capturedAt": "2026-09-07T14:45:18.871Z",
+      "capturedAt": "2026-09-08T00:54:32.873Z",
       "url": "https://day.samnguyenphoto.com/bang-den",
       "viewport": "1440x900",
       "expected": "Route /bang-den ra bảng đen, title=\"Bảng đen — Sam Teaching Visual\""
     },
     {
       "file": "08-route-studio-khong-hong.png",
-      "capturedAt": "2026-09-07T14:45:25.515Z",
+      "capturedAt": "2026-09-08T00:54:34.008Z",
       "url": "https://day.samnguyenphoto.com/studio",
       "viewport": "1440x900",
       "expected": "Studio cũ vẫn chạy, title=\"Sam Teaching Visual\""
     },
     {
       "file": "09-mobile-390-co-net-ve.png",
-      "capturedAt": "2026-09-07T14:45:33.199Z",
+      "capturedAt": "2026-09-08T00:54:35.693Z",
       "url": "https://day.samnguyenphoto.com/",
       "viewport": "390x844",
       "expected": "Mobile 390x844 vẽ được, mọi nút nằm trong khung, tràn ngang=0px, thanh công cụ ẩn 0px"
     },
     {
       "file": "10-mobile-tu-luu-sau-khi-tai-lai.png",
-      "capturedAt": "2026-09-07T14:45:38.632Z",
+      "capturedAt": "2026-09-08T00:54:36.521Z",
       "url": "https://day.samnguyenphoto.com/",
       "viewport": "390x844",
       "expected": "Nét vẽ còn nguyên sau khi tải lại trang, pixel sáng 3049 -> 3049"
     },
     {
       "file": "11-mobile-xoa-bang.png",
-      "capturedAt": "2026-09-07T14:45:39.006Z",
+      "capturedAt": "2026-09-08T00:54:36.894Z",
       "url": "https://day.samnguyenphoto.com/",
       "viewport": "390x844",
       "expected": "Xoá bảng xong canvas sạch hoàn toàn, pixel sáng = 0"

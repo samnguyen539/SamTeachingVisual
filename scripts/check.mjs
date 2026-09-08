@@ -59,7 +59,17 @@ for (const id of [
   "hideUiBtn",
   "saveImageBtn",
   "colorSwatches",
-  "widthRange"
+  "widthRange",
+  "boardRestoreBtn",
+  "pageBar",
+  "prevPageBtn",
+  "nextPageBtn",
+  "pageLabel",
+  "addPageBtn",
+  "pagesBtn",
+  "pageOverview",
+  "saveDriveBtn",
+  "boardToast"
 ]) {
   if (!boardHtml.includes(`id="${id}"`)) throw new Error(`Missing required UI element #${id} in board.html`);
 }

@@ -9,6 +9,10 @@ User=root
 WorkingDirectory=/srv/day.samnguyenphoto.com
 Environment=PORT=4890
 Environment=NODE_ENV=production
+Environment=SAM_DRIVE_PARENT=1SLTqn92hitLfiDY_t5cWre6mlc-At3rC
+Environment=SAM_DRIVE_FOLDER=_VeBangDayHoc
+Environment=SAM_DRIVE_TOKEN=/var/www/learn-superapp/apps/crm/crm-backend/src/config/google-token.json
+Environment=SAM_DRIVE_CREDENTIALS=/var/www/learn-superapp/apps/crm/crm-backend/src/config/google-credentials.json
 ExecStart=/usr/bin/node scripts/serve.mjs --dist
 Restart=always
 RestartSec=3

@@ -1,0 +1,115 @@
+{
+  "base": "https://day.samnguyenphoto.com",
+  "runDrive": true,
+  "capturedAt": "2026-09-08T01:10:28.633Z",
+  "problems": [],
+  "measurements": {
+    "start": {
+      "label": "Trang 1/1",
+      "prevDisabled": true,
+      "nextDisabled": true,
+      "restoreVisible": false
+    },
+    "afterAdd": {
+      "label": "Trang 2/2",
+      "lit": 0
+    },
+    "backTo1": {
+      "label": "Trang 1/2",
+      "lit": 6292
+    },
+    "overview": {
+      "opacity": "1",
+      "hidden": false,
+      "thumbs": 2,
+      "thumbsWithInk": 2,
+      "text": "Trang 1 1 nét • 08:10 08/09 Xoá Trang 2 1 nét • 08:10 08/09 Xoá",
+      "background": "rgba(0, 0, 0, 0.97)",
+      "toolbarOpacity": "0",
+      "pageBarOpacity": "0",
+      "hintOpacity": "0"
+    },
+    "jumped": {
+      "label": "Trang 2/2",
+      "overlayHidden": true,
+      "toolbarOpacity": "1",
+      "pageBarOpacity": "1",
+      "lit": 6159
+    },
+    "restore": {
+      "toolbarOpacity": "0",
+      "pageBarOpacity": "0",
+      "hintOpacity": "0",
+      "opacity": 0.8,
+      "width": 164,
+      "height": 40,
+      "insideViewport": true,
+      "text": "☰ Hiện thanh công cụ",
+      "pointerEvents": "auto"
+    },
+    "restoredOpacity": "1",
+    "afterReload": {
+      "label": "Trang 2/2",
+      "lit": 6159
+    },
+    "drive": {
+      "message": "Đã lưu 2 trang lên Google Drive thành công!",
+      "links": [
+        "https://drive.google.com/drive/folders/1w58Se-SED0kL-9qjDWR_grV7gJsRNU-j"
+      ],
+      "actionLabels": [
+        "Mở thư mục Drive"
+      ],
+      "toastClass": "board-toast",
+      "overlapToolbarPx": 0,
+      "insideViewport": true
+    }
+  },
+  "shots": [
+    {
+      "file": "01-trang1-co-net.png",
+      "capturedAt": "2026-09-08T01:10:13.230Z",
+      "expected": "Trang 1/1, một nét trắng, pixel sáng 6297"
+    },
+    {
+      "file": "02-trang2-moi-co-net-khac.png",
+      "capturedAt": "2026-09-08T01:10:13.972Z",
+      "expected": "Trang 2/2, nét khác hẳn trang 1, pixel sáng 6159"
+    },
+    {
+      "file": "03-quay-lai-trang1.png",
+      "capturedAt": "2026-09-08T01:10:14.461Z",
+      "expected": "Trang 1/2, nét cũ còn nguyên, pixel sáng 6292"
+    },
+    {
+      "file": "04-xem-lai-cac-trang.png",
+      "capturedAt": "2026-09-08T01:10:15.129Z",
+      "expected": "Overlay 2 ô xem trước đều có nét: \"Trang 1 1 nét • 08:10 08/09 Xoá Trang 2 1 nét • 08:10 08/09 Xoá\""
+    },
+    {
+      "file": "05-mo-trang-tu-danh-sach.png",
+      "capturedAt": "2026-09-08T01:10:15.706Z",
+      "expected": "Mở Trang 2/2 từ danh sách, pixel sáng 6159"
+    },
+    {
+      "file": "06-an-ui-nut-mo-lai-ro-rang.png",
+      "capturedAt": "2026-09-08T01:10:16.312Z",
+      "expected": "UI đã ẩn, nút mở lại opacity=0.8 164x40 chữ \"☰ Hiện thanh công cụ\""
+    },
+    {
+      "file": "07-mo-lai-thanh-cong-cu.png",
+      "capturedAt": "2026-09-08T01:10:16.878Z",
+      "expected": "Thanh công cụ hiện lại, opacity=1"
+    },
+    {
+      "file": "08-tai-lai-van-con-2-trang.png",
+      "capturedAt": "2026-09-08T01:10:17.904Z",
+      "expected": "Sau khi tải lại: \"Trang 2/2\", pixel sáng 6159"
+    },
+    {
+      "file": "09-luu-tat-ca-len-drive.png",
+      "capturedAt": "2026-09-08T01:10:28.633Z",
+      "expected": "Toast: \"Đã lưu 2 trang lên Google Drive thành công!\" · link https://drive.google.com/drive/folders/1w58Se-SED0kL-9qjDWR_grV7gJsRNU-j"
+    }
+  ]
+}

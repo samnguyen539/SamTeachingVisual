@@ -47,17 +47,21 @@ async function main() {
       deviceScaleFactor: viewport.dpr ?? 1,
       mobile: Boolean(viewport.mobile)
     });
+    // Trang bảng flush sổ trang khi `pagehide`, nên xoá localStorage trên chính
+    // nó rồi reload sẽ bị nó ghi lại. Xoá từ /studio (cùng origin) mới sạch thật.
+    if (viewport.keepScene !== true) {
+      await page.send("Page.navigate", { url: `${base}/studio` });
+      await page.waitForFunction(() => document.readyState === "complete", 30000);
+      await page.evaluate(() => {
+        try {
+          localStorage.removeItem("sam-bang-den-so");
+          localStorage.removeItem("sam-bang-den-scene");
+        } catch {}
+      });
+    }
     await page.send("Page.navigate", { url });
     await page.waitForFunction(() => document.readyState === "complete", 30000);
     await page.waitForFunction(() => Boolean(document.getElementById("boardCanvas")), 15000);
-    // Trang tự lưu nét vào localStorage; profile browser được tái dùng nên phải xoá
-    // rồi tải lại, nếu không ảnh "bảng trống" sẽ mang nét của lần chạy trước.
-    if (viewport.keepScene !== true) {
-      await page.evaluate(() => { try { localStorage.removeItem("sam-bang-den-scene"); } catch {} });
-      await page.send("Page.reload", { ignoreCache: true });
-      await page.waitForFunction(() => document.readyState === "complete", 30000);
-      await page.waitForFunction(() => Boolean(document.getElementById("boardCanvas")), 15000);
-    }
     await sleep(500);
   }
 
@@ -231,7 +235,8 @@ async function main() {
     const toolbarEl = document.getElementById("boardToolbar");
     const hintEl = document.getElementById("boardHint");
     const toolbar = toolbarEl.getBoundingClientRect();
-    const controls = [...toolbarEl.querySelectorAll("button, a, input")].map((element) => {
+    const pageBarEl = document.getElementById("pageBar");
+    const controls = [...toolbarEl.querySelectorAll("button, a, input"), ...pageBarEl.querySelectorAll("button")].map((element) => {
       const box = element.getBoundingClientRect();
       return {
         label: element.id || element.getAttribute("aria-label") || element.tagName.toLowerCase(),
@@ -248,6 +253,15 @@ async function main() {
       toolbarBottomGap: Math.round(window.innerHeight - toolbar.bottom),
       toolbarHiddenOverflow: toolbarEl.scrollWidth - toolbarEl.clientWidth,
       hintHiddenOverflow: hintEl.scrollWidth - hintEl.clientWidth,
+      pageBarHiddenOverflow: pageBarEl.scrollWidth - pageBarEl.clientWidth,
+      pageBarInside: (() => { const b = pageBarEl.getBoundingClientRect(); return b.left >= -1 && b.right <= window.innerWidth + 1 && b.top >= -1; })(),
+      hintPageBarOverlapPx: (() => {
+        const a = hintEl.getBoundingClientRect();
+        const b = pageBarEl.getBoundingClientRect();
+        const x = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
+        const y = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+        return Math.round(Math.min(x, y));
+      })(),
       offscreenControls: controls.filter((control) => !control.visible).map((control) => control.label),
       smallestControlHeight: Math.min(...controls.filter((control) => control.tappable).map((control) => control.height))
     };
@@ -257,6 +271,9 @@ async function main() {
   if (!mobile.toolbarInside) fail("thanh công cụ bị cắt ngoài khung trên mobile 390");
   if (mobile.toolbarHiddenOverflow > 1) fail(`thanh công cụ còn ${mobile.toolbarHiddenOverflow}px nội dung phải cuộn ngang mới thấy`);
   if (mobile.hintHiddenOverflow > 1) fail(`dòng gợi ý bị cắt ${mobile.hintHiddenOverflow}px`);
+  if (mobile.pageBarHiddenOverflow > 1) fail(`thanh trang bị cắt ${mobile.pageBarHiddenOverflow}px`);
+  if (!mobile.pageBarInside) fail("thanh trang nằm ngoài khung trên mobile 390");
+  if (mobile.hintPageBarOverlapPx > 0) fail(`dòng gợi ý và thanh trang đè nhau ${mobile.hintPageBarOverlapPx}px trên mobile 390`);
   if (mobile.offscreenControls.length) fail(`nút nằm ngoài màn hình 390px: ${mobile.offscreenControls.join(", ")}`);
   if (mobile.smallestControlHeight < 32) fail(`có nút cao chỉ ${mobile.smallestControlHeight}px, quá nhỏ để bấm bằng ngón tay`);
   await stroke(wave(40, 380, 300, 60, 26));
