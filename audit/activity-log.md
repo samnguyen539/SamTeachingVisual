@@ -50,6 +50,24 @@ Nhật ký thực thi canonical của repo này. Mỗi thay đổi mã, cấu h�
 - Tách `src/board.mjs` / `board.css` thành module nhỏ.
 - Chưa kiểm màn HiDPI thật (CDP override `deviceScaleFactor = 1`), chưa kiểm bút cảm ứng vật lý, chưa kiểm toast trên mobile thật (chỉ đặt CSS theo số đo desktop).
 
+### Bổ sung 08:30 — mô phỏng bút cảm ứng và ngón tay
+
+Sam hỏi có giả lập bút cảm ứng để test được không. Được, qua CDP: `Input.dispatchTouchEvent` cho ngón tay và `Input.dispatchMouseEvent` với `pointerType: "pen"` + `force` + `tiltX/tiltY` cho bút. Harness mới: `tests/ui/capture-but-cam-ung.mjs`, chạy ở `390x844`, `deviceScaleFactor 2`, `Emulation.setTouchEmulationEnabled maxTouchPoints 5`.
+
+**PASS 7 ảnh** (`report/UXQA/but-cam-ung-20260908/`), số đo:
+
+- Canvas mobile thật `780x1688` (dpr 2), `touch-action: none`, `overscroll-behavior: none`, `navigator.maxTouchPoints = 5`.
+- Ngón tay: pixel sáng `0 → 5373`, đúng **1 nét** sinh ra.
+- Kéo ngón tay **không làm trang xê dịch**: `scrollY 0`, `scrollTop 0`, `body.top 0`.
+- Bút: pixel sáng `5373 → 10216`, đúng 2 nét. Trang nhận được `pointerdown` cả hai loại — bắt tại canvas: `{loai: "touch", luc: 0.6}` và `{loai: "pen", luc: 0.75, nghieng: [12, -8]}` → đường Pointer Events xử lý đúng `pointerType` và mang được lực nhấn + độ nghiêng.
+- **Kê bàn tay rồi viết bút** (điểm cảm ứng `radius 46`, `force .95` đang giữ, bút viết đồng thời): số nét `2 → 3`, pixel sáng `10216 → 14258`. Xem ảnh `04`: chỉ có nét bút xuất hiện, **bàn tay không vẽ ra nét rác nào** — pointer sau chiếm quyền nên nét dở của bàn tay bị bỏ.
+- Tẩy bằng ngón tay: số nét `3 → 2`, pixel sáng `14258 → 8893`.
+- Chạm nút bằng ngón tay: `Ẩn thanh công cụ` → `opacity 0`; chạm viên pill `☰` → `opacity 1`. Trên `≤720px` pill thu về nút tròn chỉ có `☰` (có `aria-label` đầy đủ).
+
+**Bẫy của chính harness, đã sửa:** (1) đọc số nét ngay sau khi vẽ thì thiếu đúng một nét vì trang throttle ghi sổ 500ms → phải chờ 700ms; (2) `touchStart` rồi `touchEnd` liền không nhịp thì Chromium **không tổng hợp ra `click`** nên chạm nút vô hiệu → phải giữ ~90ms.
+
+**Giới hạn phải nói thẳng:** đây là sự kiện tổng hợp. Nó chứng minh trang xử lý đúng `pointerType` touch/pen, KHÔNG thay được bút số hoá thật — đường cong lực nhấn của phần cứng, chống kê tay ở tầng driver, và hành vi riêng của Safari trên iPad vẫn chưa kiểm.
+
 ---
 
 ## 2026-09-07 21:29 → 22:05 (Asia/Bangkok)
