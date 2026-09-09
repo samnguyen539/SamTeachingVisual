@@ -13,6 +13,8 @@ Environment=SAM_DRIVE_PARENT=1SLTqn92hitLfiDY_t5cWre6mlc-At3rC
 Environment=SAM_DRIVE_FOLDER=_VeBangDayHoc
 Environment=SAM_DRIVE_TOKEN=/var/www/learn-superapp/apps/crm/crm-backend/src/config/google-token.json
 Environment=SAM_DRIVE_CREDENTIALS=/var/www/learn-superapp/apps/crm/crm-backend/src/config/google-credentials.json
+Environment=SAM_DATA_DIR=/srv/day.samnguyenphoto.com/du-lieu
+EnvironmentFile=/etc/sam-teaching-visual-day.env
 ExecStart=/usr/bin/node scripts/serve.mjs --dist
 Restart=always
 RestartSec=3

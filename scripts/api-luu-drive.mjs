@@ -11,7 +11,20 @@ function sendJson(res, statusCode, data) {
 }
 
 function sanitizeLogMessage(msg) {
-  return String(msg || "").replace(/(?:ya29\.|AIza)[A-Za-z0-9._-]+/g, "[REDACTED]");
+  return String(msg || "")
+    .replace(/(?:ya29\.|AIza)[A-Za-z0-9._-]+/g, "[REDACTED]")
+    .replace(/1\/\/[A-Za-z0-9._-]+/g, "[REDACTED]")
+    .replace(/GOCSPX-[A-Za-z0-9._-]+/g, "[REDACTED]")
+    .replace(/"(?:access_token|refresh_token|client_secret)"\s*:\s*"[^"]+"/g, '"[REDACTED]"');
+}
+
+export function lamSachTenSo(tenSo) {
+  if (tenSo === null || tenSo === undefined) return "";
+  let s = String(tenSo).normalize("NFC").trim();
+  s = s.replace(/[/\\:*?"<>|\x00-\x1f\x7f-\x9f]/g, "");
+  s = s.replace(/\s+/g, " ");
+  s = s.slice(0, 80).trim();
+  return s;
 }
 
 export async function xuLyLuuDrive(request, response) {
@@ -44,6 +57,14 @@ export async function xuLyLuuDrive(request, response) {
     return sendJson(response, 400, {
       status: "DU_LIEU_SAI",
       message: "Danh sách file phải là mảng từ 1 đến 60 phần tử."
+    });
+  }
+
+  const tenSo = lamSachTenSo(body.tenSo);
+  if (!tenSo || /^[\s.]+$/.test(tenSo)) {
+    return sendJson(response, 400, {
+      status: "DU_LIEU_SAI",
+      message: "Tên sổ ghi chép không hợp lệ hoặc để trống."
     });
   }
 
@@ -112,6 +133,7 @@ export async function xuLyLuuDrive(request, response) {
   try {
     const resDrive = await luuVaoThuMucDrive({
       tenThuMuc,
+      tenSo,
       parentId,
       files: parsedFiles,
       tokenPath,
@@ -119,14 +141,24 @@ export async function xuLyLuuDrive(request, response) {
     });
 
     const sumBytes = parsedFiles.reduce((acc, f) => acc + f.buffer.length, 0);
-    console.log(`[DriveUpload] files=${parsedFiles.length} bytes=${sumBytes} folder=${resDrive.thuMuc.id} status=OK`);
+    const soLuongThungRac = resDrive.daChuyenVaoThung?.length || 0;
+    console.log(`[DriveUpload] tenSo="${tenSo}" folderId=${resDrive.thuMuc.id} files=${parsedFiles.length} bytes=${sumBytes} daChuyenVaoThung=${soLuongThungRac} status=OK`);
 
     return sendJson(response, 200, {
       status: "OK",
+      thuMucGoc: resDrive.thuMucGoc,
       thuMuc: resDrive.thuMuc,
-      files: resDrive.files
+      files: resDrive.files,
+      daChuyenVaoThung: resDrive.daChuyenVaoThung || [],
+      ...(resDrive.canhBao && resDrive.canhBao.length > 0 ? { canhBao: resDrive.canhBao } : {})
     });
   } catch (err) {
+    if (err.code === "DU_LIEU_SAI") {
+      return sendJson(response, 400, {
+        status: "DU_LIEU_SAI",
+        message: err.message || "Dữ liệu không hợp lệ."
+      });
+    }
     if (err.code === "THIEU_CREDENTIAL") {
       return sendJson(response, 503, {
         status: "THIEU_CREDENTIAL",

@@ -24,11 +24,14 @@ graph LR
 
 | Đường dẫn (URL) | Đích phục vụ | Mô tả |
 |---|---|---|
-| `https://day.samnguyenphoto.com/` | `/board.html` | Màn hình Bảng đen toàn khung tối giản (viết/vẽ trực tiếp) |
+| `https://day.samnguyenphoto.com/dang-nhap` | `dang-nhap.html` | Cổng đăng nhập giao diện đen tối giản |
+| `https://day.samnguyenphoto.com/` | `/board.html` | Màn hình Bảng đen (yêu cầu đăng nhập, tự chuyển hướng nếu chưa xác thực) |
 | `https://day.samnguyenphoto.com/bang-den` | `/board.html` | Đường dẫn tường minh đến màn hình Bảng đen |
 | `https://day.samnguyenphoto.com/studio` | `/index.html` | Studio giảng dạy đầy đủ tính năng |
+| `https://day.samnguyenphoto.com/api/dang-nhap` | `POST /api/dang-nhap` | API xác thực đăng nhập (nhận `{taiKhoan, matKhau}`) |
+| `https://day.samnguyenphoto.com/api/dang-xuat` | `POST /api/dang-xuat` | API đăng xuất (xoá session cookie) |
 | `https://day.samnguyenphoto.com/api/luu-drive` | `POST /api/luu-drive` | API lưu toàn bộ trang vẽ bảng đen lên Google Drive riêng tư |
-
+| `https://day.samnguyenphoto.com/api/so-tay` | `GET, PUT /api/so-tay` | API đồng bộ sổ tay và trang vẽ giữa các thiết bị |
 ---
 
 ## 3. Cách Deploy
@@ -173,3 +176,88 @@ Khai báo trong systemd unit `sam-teaching-visual-day.service`:
 2. **Bảo vệ Secret/Token**: Toàn bộ `access_token`, `refresh_token`, `client_secret` được xử lý trong bộ nhớ tiến trình Node.js, không bao giờ xuất hiện trong log hoặc thông điệp phản hồi client.
 3. **Idempotent**: Kiểm tra tên, dung lượng và MD5 trước khi ghi. File giống hệt sẽ được tái sử dụng mà không tốn lượt ghi API; file cùng tên khác nội dung được cập nhật đè tại chỗ bằng `PATCH uploadType=media`, không tạo file trùng tên.
 4. **Xác minh sau ghi**: Sau mỗi lượt upload/update, hệ thống gọi `files.get` đọc lại `size` và `md5Checksum` để đối chiếu với bản gốc, đảm bảo tính toàn vẹn 100%.
+
+---
+
+## 8. Cổng Đăng Nhập & Xác Thực (Authentication)
+
+Hệ thống bảo vệ toàn bộ giao diện bảng đen và API bằng cơ chế xác thực session cookie bảo mật cao (`sam_bang_den`, `HttpOnly; Secure; SameSite=Lax`).
+
+### 8.1. Các biến môi trường đăng nhập
+
+Khai báo trong file cấu hình bảo mật trên VPS: `/etc/sam-teaching-visual-day.env` (quyền hạn `chmod 600`, sở hữu `root:root`):
+
+- `SAM_BOARD_USER`: Tên tài khoản đăng nhập (ví dụ: `samnguyen`).
+- `SAM_BOARD_PASS`: Chuỗi băm mật khẩu chuẩn scrypt định dạng `scrypt$<muối_hex>$<băm_hex>`. Mật khẩu dạng plain-text tuyệt đối **không** được lưu vào bất kỳ file nào trong mã nguồn hoặc service.
+- `SAM_BOARD_SECRET`: Chuỗi khoá bí mật 256-bit (hex 64 ký tự) dùng để ký HMAC-SHA256 cho session cookie.
+
+> **CẢNH BÁO QUAN TRỌNG:**
+> Đổi giá trị `SAM_BOARD_SECRET` sẽ làm mất hiệu lực toàn bộ session cookie hiện có, khiến tất cả người dùng đang đăng nhập bị đăng xuất ngay lập tức. Script deploy được thiết kế giữ nguyên khoá bí mật hiện có để đảm bảo tính idempotent.
+
+### 8.2. Cách đổi mật khẩu hoặc cập nhật tài khoản
+
+Khi cần đổi mật khẩu hoặc khởi tạo tài khoản ban đầu trên VPS, chỉ cần truyền biến môi trường `SAM_BOARD_PASSWORD` (và tuỳ chọn `SAM_BOARD_USERNAME`) khi chạy lệnh deploy:
+
+```bash
+SAM_BOARD_PASSWORD="mat-khau-moi" bash deploy/day.samnguyenphoto.com/deploy.sh
+```
+
+Quy trình tự động thực hiện:
+1. Tính toán băm scrypt an toàn **tại máy local** (`MAT_KHAU="..." node scripts/xac-thuc.mjs --bam`).
+2. Truyền mã băm sang VPS qua luồng stdin bảo mật (không lộ trong danh sách tiến trình `ps`).
+3. Tự động giữ nguyên `SAM_BOARD_SECRET` cũ nếu đã có (hoặc sinh khoá mới bằng `openssl rand -hex 32` nếu file chưa tồn tại).
+4. Cập nhật file `/etc/sam-teaching-visual-day.env` với quyền `chmod 600`.
+
+Nếu chạy lệnh `deploy.sh` bình thường mà không truyền `SAM_BOARD_PASSWORD`, file env trên VPS được giữ nguyên 100%, không làm gián đoạn phiên làm việc của người dùng.
+
+### 8.3. Cách chạy Local không cần đăng nhập
+
+Khi phát triển hoặc kiểm thử tại máy local, có thể tắt cổng xác thực bằng cách đặt biến môi trường:
+
+```bash
+SAM_BOARD_AUTH=off node scripts/serve.mjs
+# hoặc chạy với bản build dist:
+SAM_BOARD_AUTH=off node scripts/serve.mjs --dist
+```
+
+Khi `SAM_BOARD_AUTH=off`, server phục vụ trực tiếp toàn bộ giao diện bảng và API mà không yêu cầu cookie hay mật khẩu.
+## 9. Đồng bộ Sổ tay & Trang vẽ Đa thiết bị (`/api/so-tay`)
+
+### 9.1. Kiến trúc lưu trữ SQLite & Hợp đồng API
+- **Vị trí CSDL**: `<SAM_DATA_DIR>/so-tay.sqlite` (mặc định trên VPS: `/srv/day.samnguyenphoto.com/du-lieu/so-tay.sqlite`).
+- **Chế độ**: `PRAGMA journal_mode = WAL` và `PRAGMA synchronous = NORMAL`.
+- **Chỉ lưu nét vẽ**: Bảng `trang` chỉ lưu `net_json` (mảng `scene.items`). Tuyệt đối không lưu PNG, base64 hay ảnh dưới mọi hình thức để CSDL luôn gọn nhẹ và truy vấn tức thì.
+- **`soHienTai` và `trangHienTai`**: Là lựa chọn riêng của từng thiết bị, chỉ lưu trong `localStorage` tại máy người dùng và **không đồng bộ lên máy chủ**.
+
+**Hai Endpoint**:
+- `GET /api/so-tay`
+  - Yêu cầu xác thực đăng nhập.
+  - Phản hồi: `200 { "rev": 12, "capNhatLuc": "ISO", "so": [...] }`. Nếu chưa có dữ liệu: trả `rev: 0, capNhatLuc: null, so: []`.
+- `PUT /api/so-tay`
+  - Yêu cầu xác thực đăng nhập. Body: `{ "so": [...] }`.
+  - Giới hạn: Tối đa 200 sổ, 500 trang mỗi sổ, kích thước body tối đa 25 MB.
+  - Xử lý: Máy chủ mở giao dịch `BEGIN IMMEDIATE`, đọc dữ liệu hiện tại, hợp nhất theo từng sổ và trang, ghi xuống và tăng `rev`.
+  - Phản hồi: `200 { "rev": 13, "capNhatLuc": "ISO", "so": [...] }` — đây là bản chuẩn đã hợp nhất, client nhận và thay thế dữ liệu local.
+
+### 9.2. Luật hợp nhất & Cơ chế Bia mộ (Tombstone)
+- Khớp sổ theo `id`, khớp trang theo `id`.
+- Bên có `suaLuc` mới hơn thắng cho `ten`, `drive` và `scene`; nếu `suaLuc` bằng nhau thì chọn tất định để `hopNhat(a,b)` và `hopNhat(b,a)` cho kết quả đồng nhất 100%.
+- Bên nào chỉ xuất hiện ở một phía thì được giữ lại, không bị mất.
+- **Cơ chế bia mộ**: Khi xoá sổ hoặc trang, bản ghi được đánh dấu `daXoa: true` kèm `xoaLuc` (ISO). Khi hợp nhất:
+  - Bia mộ chỉ thắng nếu `xoaLuc` mới hơn `suaLuc` của bên kia.
+  - Nếu thiết bị khác vừa sửa/vẽ sau thời điểm xoá (`suaLuc > xoaLuc`), nội dung sống lại và cờ `daXoa` tự động bị xoá.
+  - Giao diện người dùng lọc bỏ các mục có `daXoa: true`.
+- Thứ tự hiển thị: Sắp xếp theo `taoLuc` tăng dần, hoà thì sắp theo `id`.
+
+### 9.3. Ảnh chụp lùi (Backup Snapshot) & Chính sách lưu trữ VPS
+- **Cơ chế snapshot**: Sau mỗi lần ghi thành công (và cách lần chụp gần nhất tối thiểu 1 giờ), máy chủ thực hiện `VACUUM INTO` sao lưu toàn bộ CSDL ra:
+  `/srv/day.samnguyenphoto.com/du-lieu/anh-chup/so-tay-<yyyyMMdd-HHmmss>.sqlite`
+- **Tần suất**: Tối đa 1 bản mỗi giờ để chống phình đĩa VPS.
+- **Chính sách retention**: Hệ thống tự động giữ **20 bản snapshot gần nhất**, các bản cũ hơn bị xoá tự động theo chính sách lưu trữ của VPS.
+- **Cách khôi phục từ một bản ảnh chụp lùi**:
+  1. Dừng service Node: `ssh infiniti-vps "systemctl stop sam-teaching-visual-day"`
+  2. Sao lưu bản hiện tại: `ssh infiniti-vps "cp /srv/day.samnguyenphoto.com/du-lieu/so-tay.sqlite /srv/day.samnguyenphoto.com/du-lieu/so-tay.sqlite.bak"`
+  3. Khôi phục từ bản chụp mong muốn (ví dụ `so-tay-20260909-100000.sqlite`):
+     `ssh infiniti-vps "cp /srv/day.samnguyenphoto.com/du-lieu/anh-chup/so-tay-20260909-100000.sqlite /srv/day.samnguyenphoto.com/du-lieu/so-tay.sqlite"`
+  4. Xoá file WAL/SHM cũ nếu có: `ssh infiniti-vps "rm -f /srv/day.samnguyenphoto.com/du-lieu/so-tay.sqlite-wal /srv/day.samnguyenphoto.com/du-lieu/so-tay.sqlite-shm"`
+  5. Khởi động lại service: `ssh infiniti-vps "systemctl start sam-teaching-visual-day"`

@@ -4,6 +4,92 @@ Nhật ký thực thi canonical của repo này. Mỗi thay đổi mã, cấu h�
 
 ---
 
+## 2026-09-09 07:20 → 08:10 (Asia/Bangkok)
+
+- **Trace-ID**: `20260909-0720-samteachingvisual-dongbo-sqlite`
+- **system_id**: `SamTeachingVisual`
+- **Request**: Sam báo lỗi thật — *"máy khác thì không thấy dữ liệu của máy cũ, tôi xài trên nhiều thiết bị khác nhau"*. Sau đó chốt thêm: dùng **SQLite hoặc thứ gì nhẹ**, và **chỉ lưu nét vẽ**.
+- **Nguyên nhân**: toàn bộ sổ và trang nằm trong `localStorage` của từng máy, không hề có kho trên máy chủ.
+- **Scope**: `scripts/{hop-nhat-so-tay,api-so-tay,serve,api-dang-nhap}.mjs`, `src/board.mjs`, `board.html`, `board.css`, `scripts/check.mjs`, `tests/hop-nhat-so-tay.test.mjs`, `tests/ui/{dang-nhap-cdp,capture-dong-bo,capture-board,capture-pages,capture-but-cam-ung,capture-so-ghi-chep}.mjs`, `deploy/day.samnguyenphoto.com/**`.
+
+### Kiến trúc
+
+- Kho: **SQLite** (`node:sqlite`, zero dependency — đã đo chạy không cần cờ trên VPS `v22.23.2` và local `v24.12.0`) tại `/srv/day.samnguyenphoto.com/du-lieu/so-tay.sqlite`, WAL. Ba bảng `so` / `trang` / `kho`; **`trang.net_json` chỉ chứa mảng `scene.items`** — nét vẽ vector, không PNG, không base64.
+- API: `GET /api/so-tay` và `PUT /api/so-tay`; **máy chủ luôn hợp nhất rồi trả bản chuẩn**, không có 409, không khoá. Giới hạn 200 sổ · 500 trang/sổ · 25 MB.
+- Hợp nhất: hàm thuần `hopNhatSoTay(a, b)`, khớp theo `id`, bên `suaLuc` mới hơn thắng, hoà thì `id` lớn hơn thắng (**tất định hai chiều**), xoá dùng **bia mộ** `daXoa`/`xoaLuc` nên máy khác sửa sau khi xoá thì nội dung sống lại. `soHienTai`/`trangHienTai` là lựa chọn riêng từng máy nên **không** đồng bộ.
+- Client: đồng bộ lúc nạp trang, debounce 3 s sau khi vẽ, tối đa mỗi 15 s khi vẽ liên tục, lúc `pagehide`/`visibilitychange`, khi có lại mạng, và nút `Đồng bộ` bấm tay. Mất mạng vẫn vẽ và vẫn lưu cục bộ, thử lại giãn dần 5 s → 15 s → 60 s. Chỉ báo `#syncStatus` bốn trạng thái với `data-trang-thai` để máy đọc được.
+- Ảnh chụp lùi: `VACUUM INTO` ra `du-lieu/anh-chup/`, nhiều nhất **một bản mỗi giờ**, giữ **20 bản** — retention bắt buộc theo chính sách ổ đĩa VPS.
+
+### Ba lỗi mất dữ liệu tìm ra bằng phép đo hai máy thật
+
+| Lỗi | Số đo | Sửa |
+|---|---|---|
+| **Máy chỉ MỞ trang cũ cũng thành "bản mới nhất" và ghi đè nét của máy kia.** `writeBook()` luôn nhấc `suaLuc`, mà nó chạy cả khi chuyển sổ, mở trình quản lý và ngay trước mỗi lượt đồng bộ | máy A vẽ tới `13111` pixel sáng, máy B đồng bộ xong vẫn `7287` và đẩy bản cũ ngược lên | chỉ nhấc `suaLuc` khi JSON của `scene.items` thật sự đổi |
+| **Mỗi máy mới đẩy lên một sổ mặc định trống**, kho tích dần `SamNguyen 1` rỗng | sau 2 lượt chạy hai máy: 2 sổ rác | không gửi sổ chưa từng có trên máy chủ + mang tên mặc định + không một nét nào |
+| Toast báo lỗi mạng hiện nguyên chuỗi tiếng Anh `Failed to fetch` | ảnh `08` | đổi thành câu tiếng Việt nói rõ nét vẫn nằm trong máy và sẽ tự đồng bộ lại |
+
+### Verify
+
+- `npm run check` PASS, **29 test** (thêm 6 ca cho luật hợp nhất: hai máy tạo sổ khác nhau, cùng trang sửa hai nơi, xoá thắng, xoá thua khi máy kia sửa sau, tất định hai chiều, giữ trang chỉ có một bên).
+- `deploy.sh` **8/8** cổng smoke, thêm mốc `/api/so-tay` chưa đăng nhập → `401`.
+- `tests/ui/capture-dong-bo.mjs` **PASS** 11 ảnh — **hai profile browser riêng**, hai cookie, hai `localStorage`: máy B mới tinh thấy ngay sổ của máy A và mở ra đúng nét (`7291` cả hai) · máy A nhận sổ máy B tạo · máy A vẽ thêm thì máy B nhận đúng (`13111` vs `13107`) · xoá trên A lan sang B · mất mạng vẫn vẽ (`18435`) và trạng thái chuyển `Chưa đồng bộ — sẽ thử lại` · có mạng lại đồng bộ được, không mất nét offline · **không đẻ ra sổ rác** (`rac: []`).
+- Hồi quy **PASS**: `capture-board` 11 ảnh, `capture-pages` 9 ảnh, `capture-but-cam-ung` 7 ảnh, `capture-so-ghi-chep --drive` 13 ảnh.
+- Bộ smoke cũ phải sửa theo: từ khi có đồng bộ, **xoá `localStorage` không còn cho ra bảng trắng** (lần nạp sau kéo lại từ máy chủ) → mỗi bộ tự tạo một **sổ nháp riêng** rồi tự xoá ở cuối. Cũng phát hiện toạ độ nét bút thử ở `y=620` nay rơi trúng thanh công cụ mobile (đã cao 4-5 hàng) nên thêm phép kiểm mép trên thanh công cụ trước khi vẽ.
+
+### Dọn dẹp
+
+Các vòng chạy thử đã sinh 19 sổ QA trong kho thật; **đã đánh bia mộ toàn bộ**, kho hiện `0 sổ sống`. Không dùng `files.delete`, không đụng ảnh trên Drive. Dữ liệu thật của Sam **chưa từng nằm trong kho này** (máy Sam dùng bản trước khi có đồng bộ) — lần mở tới, sổ trong trình duyệt của Sam sẽ tự đẩy lên và từ đó mọi máy thấy chung.
+
+### Next
+
+- `src/board.mjs` đã 1425 dòng, `board.css` ~1045 dòng — nợ tách module ngày càng nặng.
+- Chưa kiểm: Safari trên iPad, hai máy sửa **cùng một nét** trong vài giây (hiện là "bên sửa sau thắng cả trang", không trộn từng nét).
+
+---
+
+## 2026-09-09 00:00 → 00:40 (Asia/Bangkok)
+
+- **Trace-ID**: `20260909-0000-samteachingvisual-soghichep-dangnhap`
+- **system_id**: `SamTeachingVisual`
+- **Request**: Sam yêu cầu (1) quản lý nhiều sổ ghi chép cho từng khoá học / buổi họp, (2) trên Drive một thư mục cha và mỗi sổ một thư mục con, (3) nút sao chép link thư mục Drive để gửi cho người khác, (4) đăng nhập đơn giản. Giữa phiên Sam bổ sung: lưu Drive phải **đè lên ảnh cũ của đúng trang** chứ đừng đẻ phiên bản mới, và tên sổ mặc định là `SamNguyen <số thứ tự>` tự sinh, đổi tên được.
+- **Scope**: `board.html`, `board.css`, `src/board.mjs`, `dang-nhap.html`, `scripts/{serve,build,check,xac-thuc,api-dang-nhap,api-luu-drive,drive-upload}.mjs`, `deploy/day.samnguyenphoto.com/**`, `tests/ui/{dang-nhap-cdp,capture-so-ghi-chep,capture-board,capture-pages,capture-but-cam-ung}.mjs`.
+
+### Actions
+
+1. **Sổ ghi chép**: `localStorage` key `sam-bang-den-so-tay` v3 bọc ngoài sổ trang v2, tự di cư và **không xoá** key cũ. Thanh sổ `#notebookBar` góc trái trên; trình quản lý `#notebookManager` (mở / đổi tên / xoá / `+ Sổ mới`) dùng lại đúng kiểu overlay và `setChromeHidden` của danh sách trang. Tên mặc định sinh bằng `tenSoMacDinh()` quét `^SamNguyen (\d+)$` lấy max+1 nên không bao giờ trùng; prompt điền sẵn tên đó, bỏ trống vẫn ra tên hợp lệ.
+2. **Drive hai tầng**: `SAM_DRIVE_PARENT (@_Document) / _VeBangDayHoc / <tên sổ> / trang-NN.png`. Tên sổ được **máy chủ** làm sạch (bỏ ký tự điều khiển và `/ \ : * ? " < > |`, gộp khoảng trắng, cắt 80) và **giữ nguyên dấu tiếng Việt**; rỗng thì `400`, không tự đổi sang tên mặc định.
+3. **Lưu đè**: tên file bỏ dấu thời gian, cố định `trang-01.png`, `trang-02.png`… nên lần lưu sau `PATCH uploadType=media` đè đúng file cũ. Ảnh của trang đã xoá khỏi sổ được **chuyển vào thùng rác** (`trashed: true`), chỉ với file khớp đúng `^trang-\d{2,3}\.png$` trong đúng thư mục của sổ — không bao giờ `files.delete`, không đụng file tên khác hay thư mục gốc.
+4. **Sao chép link**: `#copyDriveLinkBtn` trên thanh công cụ + nút `Sao chép link` trên từng dòng sổ và trong toast. `navigator.clipboard` trước, `execCommand("copy")` dự phòng, hỏng cả hai thì hiện URL cho Sam tự bôi đen.
+5. **Đăng nhập**: `scripts/xac-thuc.mjs` (scrypt + `timingSafeEqual`, cookie ký HMAC-SHA256 có hạn 30 ngày), `dang-nhap.html` tự chứa, cổng chặn mọi đường dẫn trừ danh sách công khai (HTML → `302 /dang-nhap?tiep=`, `/api/*` → `401`), chặn dò 10 lần/15 phút theo IP, trễ tối thiểu 250 ms mỗi lượt. **Fail-closed**: thiếu biến môi trường thì trả `503`, chỉ tắt cổng khi khai tường minh `SAM_BOARD_AUTH=off`.
+6. Coordinator tự vá thêm: chặn path traversal trong `serve.mjs` (`path.resolve` + kiểm tiền tố thư mục gốc) — lỗ này có từ bản gốc, giờ máy chủ public nên phải bịt.
+
+### Bí mật để ở đâu
+
+Tài khoản/mật khẩu **không nằm trong git**. `deploy.sh` băm mật khẩu **tại máy local** từ biến môi trường `SAM_BOARD_PASSWORD`, truyền sang VPS qua **stdin của ssh** (không qua tham số dòng lệnh vì lộ trong `ps`), ghi `/etc/sam-teaching-visual-day.env` `chmod 600`; `SAM_BOARD_SECRET` sinh bằng `openssl rand -hex 32` **chỉ khi chưa có** (đổi khoá là đá văng mọi phiên). Grep toàn repo `samnguyen@123` → 0 kết quả.
+
+### Hai lỗi tìm ra bằng ảnh UI thật rồi sửa
+
+| Lỗi | Số đo | Sửa |
+|---|---|---|
+| Mobile 390: thanh sổ đè thanh trang | `soVsTrang: 9` px | Ba thanh xếp chồng theo hàng: sổ `top 8` → trang `top 56` → gợi ý `top 106`; tên sổ được nới `max-width: calc(100vw - 110px)` |
+| Bộ smoke cũ đọc số nét từ key v2 nên trả `null` | `soNet: null` | Đọc từ `sam-bang-den-so-tay` v3 |
+
+### Verify
+
+- `npm run check` PASS. `deploy.sh` **7/7** cổng smoke, đã cập nhật kỳ vọng theo cổng đăng nhập: `/` `302`, `/dang-nhap` `200`, `POST /api/luu-drive` chưa đăng nhập `401`, `/bang-den` `/studio` `302`, ngoài internet `302`.
+- `tests/ui/capture-so-ghi-chep.mjs --drive` **PASS** 13 ảnh: chưa đăng nhập bị chặn (`coBang: false`) · sai mật khẩu bị từ chối (`"Sai tài khoản hoặc mật khẩu."`) · đăng nhập thật qua form vào thẳng bảng · sổ mặc định `SamNguyen 1` · bỏ trống tên → `SamNguyen 2` với prompt điền sẵn đúng tên · đổi tên ăn ngay · chuyển sổ giữ đúng nét riêng (`lit 6370`) · ba thanh không đè nhau ở cả 1440 và 390 · lưu lần 1 `1 trang mới` · clipboard đọc lại đúng `https://drive.google.com/drive/folders/1SG6SXFMgcmVBy-e9iFDv2uerzwdoDCgV`, nhãn nút đổi `Đã sao chép` · **vẽ thêm rồi lưu lần 2 báo `1 trang cập nhật, 0 trang mới`** · đăng xuất về trang đăng nhập.
+- Hồi quy **PASS**: `capture-board.mjs` 11 ảnh, `capture-pages.mjs` 9 ảnh, `capture-but-cam-ung.mjs` 7 ảnh.
+- Kiểm chứng Drive bằng API từ VPS: `_VeBangDayHoc/SamNguyen 1/` chỉ có **một** `trang-01.png` (`57012` bytes, md5 `d817bf…`), `modifiedTime` là lần lưu gần nhất → đè đúng, không sinh bản sao.
+- Đăng nhập kiểm bằng `curl` từ internet: sai mật khẩu `401`, đúng `200 + Set-Cookie`, `/` có cookie `200` ra `<title>Bảng đen — Sam Teaching Visual</title>`, không cookie `302`.
+
+### Next
+
+- Thư mục gốc `_VeBangDayHoc` còn **18 ảnh Sam lưu thật tối 08/09** theo cách đặt tên cũ (`bang-den-20260908-2308-trang-*.png`) cùng 13 ảnh thử nghiệm cũ hơn. **Không tự xoá** — Sam tự dọn nếu muốn; từ nay ảnh mới đi vào thư mục con của sổ.
+- Nợ kỹ thuật tăng: `src/board.mjs` 1029 dòng, `board.css` ~950 dòng. Cần tách module.
+- Chưa kiểm: Safari trên iPad, màn HiDPI thật, bút số hoá vật lý.
+
+---
+
 ## 2026-09-08 07:20 → 08:00 (Asia/Bangkok)
 
 - **Trace-ID**: `20260908-0720-samteachingvisual-nhieutrang-drive`

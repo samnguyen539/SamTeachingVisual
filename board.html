@@ -13,6 +13,17 @@
 
   <p id="boardHint">Kéo chuột hoặc bút để viết • Bấm ☰ góc phải dưới hoặc phím H để hiện lại • F: toàn màn hình • Ctrl+Z: hoàn tác</p>
 
+  <nav id="notebookBar" class="notebook-bar" aria-label="Quản lý sổ ghi chép">
+    <button type="button" id="notebookBtn" class="notebook-btn" aria-label="Quản lý sổ ghi chép" title="Quản lý sổ ghi chép">
+      <span class="notebook-icon" aria-hidden="true">📓</span>
+      <span id="notebookName" class="notebook-name">SamNguyen 1</span>
+    </button>
+    <div id="syncStatus" class="sync-status" data-trang-thai="dang" role="status" aria-live="polite" title="Đang đồng bộ…">
+      <span class="sync-dot" aria-hidden="true"></span>
+      <span class="sync-text"><span class="sync-text-full">Đang đồng bộ…</span><span class="sync-text-short">Đang đồng bộ</span></span>
+    </div>
+  </nav>
+
   <nav id="pageBar" class="page-bar" aria-label="Điều khiển trang bảng">
     <button type="button" id="prevPageBtn" class="page-btn" aria-label="Trang trước" title="Trang trước ([ hoặc PageUp])">‹</button>
     <span id="pageLabel" class="page-label">Trang 1/1</span>
@@ -43,10 +54,13 @@
     <button type="button" id="clearBtn" class="action-btn" aria-label="Xoá toàn bộ bảng" title="Xoá bảng">Xoá bảng</button>
     <button type="button" id="saveImageBtn" class="action-btn" aria-label="Lưu ảnh bảng dưới dạng PNG" title="Lưu ảnh PNG">Lưu ảnh PNG</button>
     <button type="button" id="saveDriveBtn" class="action-btn" aria-label="Lưu toàn bộ các trang lên Google Drive" title="Lưu tất cả lên Drive">Lưu tất cả lên Drive</button>
+    <button type="button" id="copyDriveLinkBtn" class="action-btn" aria-label="Sao chép link thư mục Drive" title="Lưu lên Drive trước đã" disabled>Sao chép link</button>
+    <button type="button" id="syncNowBtn" class="action-btn" aria-label="Đồng bộ dữ liệu sổ tay với máy chủ" title="Đồng bộ với máy chủ ngay">Đồng bộ</button>
     <button type="button" id="fullscreenBtn" class="action-btn" aria-label="Toàn màn hình" title="Toàn màn hình (F)">Toàn màn hình</button>
     <button type="button" id="hideUiBtn" class="action-btn" aria-label="Ẩn thanh công cụ" title="Ẩn thanh công cụ (H)">Ẩn thanh công cụ</button>
 
     <a href="/studio" class="studio-link" title="Chuyển sang Studio ghi hình">Studio</a>
+    <button type="button" id="logoutBtn" class="action-btn logout-btn" aria-label="Đăng xuất" title="Đăng xuất">Đăng xuất</button>
   </div>
 
   <button type="button" id="boardRestoreBtn" class="restore-btn ui-hidden" aria-label="Hiện lại thanh công cụ" title="Hiện thanh công cụ (H)">
@@ -62,6 +76,16 @@
     <div id="overviewGrid" class="overview-grid"></div>
   </div>
 
+  <div id="notebookManager" class="page-overview ui-hidden" role="dialog" aria-modal="true" aria-label="Quản lý sổ ghi chép">
+    <div class="overview-header">
+      <h2 class="overview-title">Sổ ghi chép</h2>
+      <div class="overview-actions">
+        <button type="button" id="addNotebookBtn" class="overview-add-btn" aria-label="Thêm sổ mới">+ Sổ mới</button>
+        <button type="button" id="closeNotebookBtn" class="overview-close-btn" aria-label="Đóng quản lý sổ">Đóng (Esc)</button>
+      </div>
+    </div>
+    <div id="notebookList" class="notebook-list"></div>
+  </div>
   <div id="boardToast" class="board-toast ui-hidden" role="status" aria-live="polite">
     <div id="toastMessage" class="toast-message"></div>
     <div id="toastActions" class="toast-actions"></div>

@@ -9,6 +9,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { launchWindowsGpuBrowser } from "file:///D:/New_System_AI/SamAnimationPhoto/tools/cdp-frame-capture.js";
+import { dangNhapQuaGiaoDien, taoSoSach, xoaSoTheoTen } from "./dang-nhap-cdp.mjs";
 
 const base = (process.argv[2] || "https://day.samnguyenphoto.com").replace(/\/$/, "");
 const outDir = path.resolve(process.argv[3] || "report/UXQA/bang-den-trang");
@@ -40,6 +41,7 @@ async function main() {
     height: 900
   });
   const page = session.page;
+  await dangNhapQuaGiaoDien(page, base);
 
   async function shoot(file, expected) {
     await page.screenshot(path.join(outDir, file));
@@ -47,24 +49,18 @@ async function main() {
     console.log(`shot ${file} :: ${expected}`);
   }
 
+  const tenSoNhap = `QA trang ${Date.now().toString(36).slice(-5)}`;
   async function open({ fresh = true } = {}) {
-    if (fresh) {
-      // Trang bảng flush sổ trang khi `pagehide`, nên xoá localStorage ngay trên
-      // trang bảng rồi reload sẽ bị chính nó ghi lại. Phải xoá từ một trang khác
-      // cùng origin (studio) để bộ nhớ trong RAM của bảng không còn sống.
-      await page.send("Page.navigate", { url: `${base}/studio` });
-      await page.waitForFunction(() => document.readyState === "complete", 30000);
-      await page.evaluate(() => {
-        try {
-          localStorage.removeItem("sam-bang-den-so");
-          localStorage.removeItem("sam-bang-den-scene");
-        } catch {}
-      });
-    }
+    // Có đồng bộ máy chủ thì xoá localStorage không còn cho ra sổ trắng nữa —
+    // sổ nháp riêng mới bảo đảm đếm trang bắt đầu từ "Trang 1/1".
     await page.send("Page.navigate", { url: `${base}/` });
     await page.waitForFunction(() => document.readyState === "complete", 30000);
     await page.waitForFunction(() => Boolean(document.getElementById("pageLabel")), 15000);
-    await sleep(500);
+    await sleep(fresh ? 1200 : 500);
+    if (fresh) {
+      await taoSoSach(page, tenSoNhap);
+      await sleep(400);
+    }
   }
 
   async function stroke(points) {
@@ -270,6 +266,8 @@ async function main() {
     path.join(outDir, "index.json"),
     JSON.stringify({ base, runDrive, capturedAt: new Date().toISOString(), problems, measurements, shots }, null, 2)
   );
+
+  await xoaSoTheoTen(page, tenSoNhap);
 
   await session.close();
   console.log(`\n${problems.length === 0 ? "PASS" : `FAIL (${problems.length})`} — bằng chứng tại ${outDir}`);

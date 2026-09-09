@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng đen — Sam Teaching Visual</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #000;
+      color: #f3f4f6;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .hop-dang-nhap {
+      width: 100%;
+      max-width: 380px;
+      background: #111113;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 14px;
+      padding: 32px 28px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .tieu-de {
+      margin: 0 0 6px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #f3f4f6;
+      letter-spacing: -0.01em;
+    }
+    .phu-de {
+      margin: 0 0 24px 0;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+    .nhom-nhap {
+      margin-bottom: 18px;
+    }
+    .nhan {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #d1d5db;
+    }
+    input {
+      width: 100%;
+      padding: 10px 14px;
+      background: #1c1c1f;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 10px;
+      color: #f3f4f6;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    input:focus {
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
+    }
+    #nutDangNhap {
+      width: 100%;
+      padding: 11px 16px;
+      margin-top: 8px;
+      background: #f3f4f6;
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.15s ease, opacity 0.15s ease;
+    }
+    #nutDangNhap:hover:not(:disabled) {
+      background: #ffffff;
+    }
+    #nutDangNhap:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    #loiDangNhap {
+      margin: 16px 0 0 0;
+      font-size: 13px;
+      color: #ef4444;
+      line-height: 1.4;
+      min-height: 18px;
+    }
+    #loiDangNhap:empty {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="hop-dang-nhap">
+    <h1 class="tieu-de">Bảng đen — Sam Teaching Visual</h1>
+    <p class="phu-de">Đăng nhập để vào bảng</p>
+    <form id="formDangNhap">
+      <div class="nhom-nhap">
+        <label class="nhan" for="taiKhoan">Tài khoản</label>
+        <input id="taiKhoan" name="username" autocomplete="username" required>
+      </div>
+      <div class="nhom-nhap">
+        <label class="nhan" for="matKhau">Mật khẩu</label>
+        <input id="matKhau" type="password" name="current-password" autocomplete="current-password" required>
+      </div>
+      <button id="nutDangNhap" type="submit">Đăng nhập</button>
+      <p id="loiDangNhap" role="alert"></p>
+    </form>
+  </div>
+  <script>
+    const form = document.getElementById("formDangNhap");
+    const nut = document.getElementById("nutDangNhap");
+    const loi = document.getElementById("loiDangNhap");
+    const inputTaiKhoan = document.getElementById("taiKhoan");
+    const inputMatKhau = document.getElementById("matKhau");
+
+    function tinhDuongDanTiep() {
+      const thamSo = new URLSearchParams(window.location.search);
+      const tiep = thamSo.get("tiep");
+      if (tiep && tiep.startsWith("/") && !tiep.startsWith("//") && !tiep.startsWith("/\\")) {
+        return tiep;
+      }
+      return "/";
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      loi.textContent = "";
+      nut.disabled = true;
+      nut.textContent = "Đang kiểm tra…";
+
+      const taiKhoan = inputTaiKhoan.value.trim();
+      const matKhau = inputMatKhau.value;
+
+      try {
+        const phanHoi = await fetch("/api/dang-nhap", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ taiKhoan, matKhau })
+        });
+        const ketQua = await phanHoi.json().catch(() => ({}));
+        if (phanHoi.ok) {
+          const dich = tinhDuongDanTiep();
+          window.location.replace(dich);
+          return;
+        }
+        loi.textContent = ketQua.message || "Đăng nhập thất bại. Vui lòng thử lại.";
+      } catch (err) {
+        loi.textContent = "Không thể kết nối đến máy chủ. Vui lòng thử lại.";
+      } finally {
+        nut.disabled = false;
+        nut.textContent = "Đăng nhập";
+      }
+    });
+  </script>
+</body>
+</html>

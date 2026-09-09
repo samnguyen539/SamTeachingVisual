@@ -13,6 +13,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { launchWindowsGpuBrowser } from "file:///D:/New_System_AI/SamAnimationPhoto/tools/cdp-frame-capture.js";
+import { dangNhapQuaGiaoDien, taoSoSach, xoaSoTheoTen } from "./dang-nhap-cdp.mjs";
 
 const base = (process.argv[2] || "http://127.0.0.1:4173").replace(/\/$/, "");
 const outDir = path.resolve(process.argv[3] || "report/UXQA/bang-den");
@@ -33,6 +34,7 @@ async function main() {
     height: 900
   });
   const page = session.page;
+  await dangNhapQuaGiaoDien(page, base);
 
   async function shoot(file, meta) {
     await page.screenshot(path.join(outDir, file));
@@ -47,18 +49,8 @@ async function main() {
       deviceScaleFactor: viewport.dpr ?? 1,
       mobile: Boolean(viewport.mobile)
     });
-    // Trang bảng flush sổ trang khi `pagehide`, nên xoá localStorage trên chính
-    // nó rồi reload sẽ bị nó ghi lại. Xoá từ /studio (cùng origin) mới sạch thật.
-    if (viewport.keepScene !== true) {
-      await page.send("Page.navigate", { url: `${base}/studio` });
-      await page.waitForFunction(() => document.readyState === "complete", 30000);
-      await page.evaluate(() => {
-        try {
-          localStorage.removeItem("sam-bang-den-so");
-          localStorage.removeItem("sam-bang-den-scene");
-        } catch {}
-      });
-    }
+    // Từ khi có đồng bộ máy chủ, xoá localStorage không còn cho ra bảng trắng —
+    // lần nạp sau kéo lại toàn bộ sổ. Bộ smoke đo trên một sổ nháp riêng.
     await page.send("Page.navigate", { url });
     await page.waitForFunction(() => document.readyState === "complete", 30000);
     await page.waitForFunction(() => Boolean(document.getElementById("boardCanvas")), 15000);
@@ -87,6 +79,8 @@ async function main() {
   // ── Desktop 1440x900 ────────────────────────────────────────────────────────
   const desktop = { width: 1440, height: 900 };
   await open(`${base}/`, desktop);
+  const soNhap = await taoSoSach(page, `QA bang ${Date.now().toString(36).slice(-5)}`);
+  console.log("sổ nháp:", soNhap);
 
   const rootInfo = await page.evaluate(() => {
     const canvas = document.getElementById("boardCanvas");
@@ -318,6 +312,12 @@ async function main() {
     path.join(outDir, "index.json"),
     JSON.stringify({ base, capturedAt: new Date().toISOString(), problems, measurements: { rootInfo, activeSwatch, dominant, litBefore, litAfterWhite, litAfterUndo, yellow, hidden, mobile, studio, litMobileBefore, litMobileAfterReload, litAfterClear }, shots }, null, 2)
   );
+
+  await page.send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
+  await page.send("Page.navigate", { url: `${base}/` });
+  await page.waitForFunction(() => Boolean(document.getElementById("notebookBtn")), 20000);
+  await sleep(1200);
+  await xoaSoTheoTen(page, soNhap);
 
   await session.close();
   console.log(`\n${problems.length === 0 ? "PASS" : `FAIL (${problems.length})`} — bằng chứng tại ${outDir}`);

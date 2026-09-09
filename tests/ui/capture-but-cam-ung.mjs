@@ -16,6 +16,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { launchWindowsGpuBrowser } from "file:///D:/New_System_AI/SamAnimationPhoto/tools/cdp-frame-capture.js";
+import { dangNhapQuaGiaoDien, taoSoSach, xoaSoTheoTen } from "./dang-nhap-cdp.mjs";
 
 const base = (process.argv[2] || "https://day.samnguyenphoto.com").replace(/\/$/, "");
 const outDir = path.resolve(process.argv[3] || "report/UXQA/but-cam-ung");
@@ -46,6 +47,7 @@ async function main() {
     height: 844
   });
   const page = session.page;
+  await dangNhapQuaGiaoDien(page, base);
 
   async function shoot(file, expected) {
     await page.screenshot(path.join(outDir, file));
@@ -59,8 +61,9 @@ async function main() {
     await sleep(700);
     return page.evaluate(() => {
       try {
-        const book = JSON.parse(localStorage.getItem("sam-bang-den-so"));
-        return book.trang[book.trangHienTai].scene.items.length;
+        const sotay = JSON.parse(localStorage.getItem("sam-bang-den-so-tay"));
+        const so = sotay.so.find((item) => item.id === sotay.soHienTai) || sotay.so[0];
+        return so.trang[so.trangHienTai].scene.items.length;
       } catch {
         return null;
       }
@@ -71,19 +74,16 @@ async function main() {
   await page.send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
   await page.send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 5 });
 
+  const tenSoNhap = `QA but ${Date.now().toString(36).slice(-5)}`;
   async function openFresh() {
-    await page.send("Page.navigate", { url: `${base}/studio` });
-    await page.waitForFunction(() => document.readyState === "complete", 30000);
-    await page.evaluate(() => {
-      try {
-        localStorage.removeItem("sam-bang-den-so");
-        localStorage.removeItem("sam-bang-den-scene");
-      } catch {}
-    });
+    // Có đồng bộ máy chủ rồi thì xoá localStorage không cho ra bảng trắng nữa —
+    // phải tạo một sổ nháp riêng để đo, và xoá nó ở cuối.
     await page.send("Page.navigate", { url: `${base}/` });
     await page.waitForFunction(() => document.readyState === "complete", 30000);
     await page.waitForFunction(() => Boolean(document.getElementById("boardCanvas")), 15000);
-    await sleep(500);
+    await sleep(1200);
+    await taoSoSach(page, tenSoNhap);
+    await sleep(400);
   }
 
   const arc = (x0, y0, width, amplitude, steps = 24) =>
@@ -168,7 +168,15 @@ async function main() {
 
   // 3. Vẽ bằng bút, màu vàng cho dễ phân biệt.
   await page.evaluate(() => document.querySelector('#colorSwatches [data-color="#ffd43b"]').click());
-  await penStroke(arc(50, 620, 290, 90));
+  // Thanh công cụ trên điện thoại nay xếp 4-5 hàng nên mép trên của nó dâng lên
+  // tận y≈600; nét bút vẽ ở y 620 rơi trúng thanh công cụ và không tới canvas.
+  const mepTrenThanhCongCu = await page.evaluate(() => Math.round(document.getElementById("boardToolbar").getBoundingClientRect().top));
+  measurements.mepTrenThanhCongCu = mepTrenThanhCongCu;
+  const yBut = 500;
+  if (yBut >= mepTrenThanhCongCu - 8) {
+    fail(`vùng vẽ thử của bút (y=${yBut}) chạm thanh công cụ (mép trên y=${mepTrenThanhCongCu}) — sửa toạ độ trong bộ smoke`);
+  }
+  await penStroke(arc(50, yBut, 290, 80));
   const litPen = await lit();
   const soNetPen = await strokeCount();
   const loaiConTro = await page.evaluate(() => window.__loaiConTro);
@@ -257,6 +265,12 @@ async function main() {
       2
     )
   );
+
+  await page.send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
+  await page.send("Page.navigate", { url: `${base}/` });
+  await page.waitForFunction(() => Boolean(document.getElementById("notebookBtn")), 20000);
+  await sleep(1200);
+  await xoaSoTheoTen(page, tenSoNhap);
 
   await session.close();
   console.log(`\n${problems.length === 0 ? "PASS" : `FAIL (${problems.length})`} — bằng chứng tại ${outDir}`);

@@ -69,6 +69,17 @@ for (const id of [
   "pagesBtn",
   "pageOverview",
   "saveDriveBtn",
+  "copyDriveLinkBtn",
+  "syncNowBtn",
+  "logoutBtn",
+  "notebookBar",
+  "notebookBtn",
+  "notebookName",
+  "syncStatus",
+  "notebookManager",
+  "notebookList",
+  "addNotebookBtn",
+  "closeNotebookBtn",
   "boardToast"
 ]) {
   if (!boardHtml.includes(`id="${id}"`)) throw new Error(`Missing required UI element #${id} in board.html`);

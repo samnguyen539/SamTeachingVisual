@@ -14,7 +14,7 @@ async function layAccessToken({ tokenPath, credentialsPath }) {
   try {
     if (tokenPath) tokenData = JSON.parse(await readFile(tokenPath, "utf8"));
   } catch (err) {
-    const error = new Error(`Không đọc được file token Drive: ${err.message}`);
+    const error = new Error(`Không đọc được file token Google Drive (${tokenPath}): ${err.message}`);
     error.code = "THIEU_CREDENTIAL";
     throw error;
   }
@@ -27,7 +27,7 @@ async function layAccessToken({ tokenPath, credentialsPath }) {
   const clientSecret = tokenData.client_secret || inst.client_secret;
   const refreshToken = tokenData.refresh_token;
   if (!refreshToken || !clientId || !clientSecret) {
-    const error = new Error("Thiếu refresh_token, client_id hoặc client_secret Google Drive.");
+    const error = new Error("Thiếu refresh_token hoặc client_id/client_secret để làm mới access_token.");
     error.code = "THIEU_CREDENTIAL";
     throw error;
   }
@@ -39,13 +39,14 @@ async function layAccessToken({ tokenPath, credentialsPath }) {
       method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: params.toString()
     });
   } catch (err) {
-    const error = new Error(`Lỗi mạng khi xin access_token Google Drive: ${err.message}`);
+    const error = new Error(`Không kết nối được oauth2.googleapis.com: ${err.message}`);
     error.code = "DRIVE_LOI";
     throw error;
   }
   if (!res.ok) {
-    const error = new Error(`Không đổi được refresh_token Google Drive (HTTP ${res.status})`);
-    error.code = res.status === 400 || res.status === 401 ? "THIEU_CREDENTIAL" : "DRIVE_LOI";
+    const text = await res.text().catch(() => "");
+    const error = new Error(`Làm mới access token thất bại (HTTP ${res.status}): ${text.slice(0, 200)}`);
+    error.code = "THIEU_CREDENTIAL";
     throw error;
   }
   const payload = await res.json();
@@ -117,16 +118,23 @@ async function kiemTraQuyenRiengTu(folderId, accessToken) {
   }
 }
 
-export async function luuVaoThuMucDrive({ tenThuMuc = "_VeBangDayHoc", parentId, files, tokenPath, credentialsPath }) {
+export async function luuVaoThuMucDrive({ tenThuMuc = "_VeBangDayHoc", tenSo, parentId, files, tokenPath, credentialsPath }) {
   if (!parentId) {
     const err = new Error("Máy chủ chưa cấu hình thư mục Google Drive đích (SAM_DRIVE_PARENT).");
     err.code = "THIEU_CREDENTIAL";
     throw err;
   }
+  if (!tenSo) {
+    const err = new Error("Thiếu tên sổ ghi chép.");
+    err.code = "DU_LIEU_SAI";
+    throw err;
+  }
   const accessToken = await layAccessToken({ tokenPath, credentialsPath });
   await kiemTraThuMucCha(parentId, accessToken);
-  const folderId = await timHoacTaoThuMucCon(tenThuMuc, parentId, accessToken);
-  await kiemTraQuyenRiengTu(folderId, accessToken);
+  const gocId = await timHoacTaoThuMucCon(tenThuMuc, parentId, accessToken);
+  await kiemTraQuyenRiengTu(gocId, accessToken);
+  const soFolderId = await timHoacTaoThuMucCon(tenSo, gocId, accessToken);
+  await kiemTraQuyenRiengTu(soFolderId, accessToken);
 
   const ketQua = [];
   for (const file of files) {
@@ -134,7 +142,7 @@ export async function luuVaoThuMucDrive({ tenThuMuc = "_VeBangDayHoc", parentId,
     const bytes = buffer.length;
     const md5 = crypto.createHash("md5").update(buffer).digest("hex");
 
-    const q = `'${escQuery(folderId)}' in parents and name='${escQuery(ten)}' and trashed=false`;
+    const q = `'${escQuery(soFolderId)}' in parents and name='${escQuery(ten)}' and trashed=false`;
     const searchUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,size,md5Checksum,webViewLink)&supportsAllDrives=true`;
     const sData = await (await driveFetch(searchUrl, { method: "GET" }, accessToken)).json();
     const exist = sData.files && sData.files[0];
@@ -151,7 +159,7 @@ export async function luuVaoThuMucDrive({ tenThuMuc = "_VeBangDayHoc", parentId,
       trangThai = "cap_nhat";
     } else {
       const b = `-------SamBoundary${Date.now()}${Math.random().toString(36).slice(2, 7)}`;
-      const meta = JSON.stringify({ name: ten, parents: [folderId] });
+      const meta = JSON.stringify({ name: ten, parents: [soFolderId] });
       const p1 = `--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${b}\r\nContent-Type: ${kieu}\r\n\r\n`;
       const p3 = `\r\n--${b}--\r\n`;
       const body = Buffer.concat([Buffer.from(p1, "utf8"), buffer, Buffer.from(p3, "utf8")]);
@@ -171,5 +179,45 @@ export async function luuVaoThuMucDrive({ tenThuMuc = "_VeBangDayHoc", parentId,
     ketQua.push({ ten, id: fileId, bytes, md5, url: vData.webViewLink || `https://drive.google.com/file/d/${fileId}/view`, trangThai });
   }
 
-  return { thuMuc: { id: folderId, ten: tenThuMuc, url: `https://drive.google.com/drive/folders/${folderId}` }, files: ketQua };
+  const daChuyenVaoThung = [];
+  const canhBao = [];
+  if (Array.isArray(files) && files.length > 0) {
+    try {
+      const tenFileVuaGui = new Set(files.map((f) => f.ten));
+      const qList = `'${escQuery(soFolderId)}' in parents and trashed=false`;
+      const listUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(qList)}&fields=files(id,name)&pageSize=1000&supportsAllDrives=true`;
+      const lRes = await driveFetch(listUrl, { method: "GET" }, accessToken);
+      const lData = await lRes.json();
+      const filesTrongSo = Array.isArray(lData.files) ? lData.files : [];
+
+      for (const item of filesTrongSo) {
+        if (!item || !item.name || !item.id) continue;
+        if (/^trang-\d{2,3}\.png$/.test(item.name) && !tenFileVuaGui.has(item.name)) {
+          try {
+            const trashUrl = `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(item.id)}?supportsAllDrives=true`;
+            await driveFetch(trashUrl, {
+              method: "PATCH",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ trashed: true })
+            }, accessToken);
+            daChuyenVaoThung.push({ ten: item.name, id: item.id });
+          } catch (trashErr) {
+            console.warn(`[DriveUpload] Không thể chuyển file "${item.name}" vào thùng rác:`, trashErr.message);
+            canhBao.push(`Không thể chuyển file ${item.name} vào thùng rác: ${trashErr.message}`);
+          }
+        }
+      }
+    } catch (listErr) {
+      console.warn("[DriveUpload] Không thể kiểm tra file cũ để dọn thùng rác:", listErr.message);
+      canhBao.push(`Không thể kiểm tra file cũ để dọn thùng rác: ${listErr.message}`);
+    }
+  }
+
+  return {
+    thuMucGoc: { id: gocId, ten: tenThuMuc, url: `https://drive.google.com/drive/folders/${gocId}` },
+    thuMuc: { id: soFolderId, ten: tenSo, url: `https://drive.google.com/drive/folders/${soFolderId}` },
+    files: ketQua,
+    daChuyenVaoThung,
+    ...(canhBao.length > 0 ? { canhBao } : {})
+  };
 }
