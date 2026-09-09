@@ -6,6 +6,7 @@ node_modules/
 *.webm
 render-output/
 .browser-profile/
+.profile-may-*/
 .env
 .env.*
 !.env.example
