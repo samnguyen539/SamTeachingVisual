@@ -25,6 +25,7 @@ const notebookBar = $("#notebookBar");
 const notebookBtn = $("#notebookBtn");
 const notebookName = $("#notebookName");
 const syncStatusEl = $("#syncStatus");
+const notebookToggleBtn = $("#notebookToggleBtn");
 const notebookManager = $("#notebookManager");
 const closeNotebookBtn = $("#closeNotebookBtn");
 const addNotebookBtn = $("#addNotebookBtn");
@@ -483,11 +484,25 @@ function openOverview() {
   setChromeHidden(true);
 }
 
+// Sam yêu cầu thanh sổ (tên sổ + trạng thái đồng bộ) mặc định ẨN cho sạch màn
+// hình, chỉ hiện khi bấm nút nhỏ dưới thanh công cụ. Trạng thái này KHÔNG được
+// nhớ qua lần tải trang: mở lên là ẩn.
+let hienThanhSo = false;
+
+function apDungHienThanhSo(chromeDangAn = false) {
+  if (notebookBar) notebookBar.classList.toggle("ui-hidden", chromeDangAn || !hienThanhSo);
+  notebookToggleBtn?.classList.toggle("active", hienThanhSo && !chromeDangAn);
+  if (notebookToggleBtn) {
+    notebookToggleBtn.setAttribute("aria-pressed", String(hienThanhSo));
+    notebookToggleBtn.title = hienThanhSo ? "Ẩn tên sổ và trạng thái đồng bộ" : "Hiện tên sổ và trạng thái đồng bộ";
+  }
+}
+
 function setChromeHidden(hidden) {
   toolbar.classList.toggle("ui-hidden", hidden);
   if (hint) hint.classList.toggle("ui-hidden", hidden);
   if (pageBar) pageBar.classList.toggle("ui-hidden", hidden);
-  if (notebookBar) notebookBar.classList.toggle("ui-hidden", hidden);
+  apDungHienThanhSo(hidden);
 }
 
 function closeOverview() {
@@ -1057,8 +1072,15 @@ function setUiHidden(hidden) {
   if (hint) hint.classList.toggle("ui-hidden", hidden);
   if (restoreBtn) restoreBtn.classList.toggle("ui-hidden", !hidden);
   if (pageBar) pageBar.classList.toggle("ui-hidden", hidden);
-  if (notebookBar) notebookBar.classList.toggle("ui-hidden", hidden);
+  apDungHienThanhSo(hidden);
 }
+
+notebookToggleBtn?.addEventListener("click", () => {
+  hienThanhSo = !hienThanhSo;
+  apDungHienThanhSo(toolbar.classList.contains("ui-hidden"));
+});
+
+apDungHienThanhSo(false);
 
 hideUiBtn.addEventListener("click", () => setUiHidden(true));
 if (restoreBtn) {

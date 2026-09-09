@@ -4,6 +4,37 @@ Nhật ký thực thi canonical của repo này. Mỗi thay đổi mã, cấu h�
 
 ---
 
+## 2026-09-09 09:00 → 09:20 (Asia/Bangkok)
+
+- **Trace-ID**: `20260909-0900-samteachingvisual-an-thanh-so`
+- **system_id**: `SamTeachingVisual`
+- **Request**: Sam gửi đúng chuỗi chữ đang hiện góc trái — `📓 SamNguyen 1 · Đã đồng bộ 09:04` — và yêu cầu **ẩn đi, bấm nút nhỏ ở phía dưới mới hiện ra**.
+- **Scope**: `board.html`, `board.css`, `src/board.mjs`, `scripts/check.mjs`, `tests/ui/{capture-dong-bo,capture-so-ghi-chep}.mjs`.
+
+### Actions
+
+1. `#notebookBar` (tên sổ + chỉ báo đồng bộ) nay mang sẵn `ui-hidden` trong HTML → **mở trang lên là ẩn**, góc trái sạch để quay màn hình.
+2. Thêm nút nhỏ `#notebookToggleBtn` (`📓`, 44×40) làm **nút đầu tiên trong thanh công cụ dưới đáy** — đúng nghĩa "nút nhỏ ở phía dưới". Bấm để hiện/ẩn; đang hiện thì nút sáng viền vàng, `aria-pressed` và `title` đổi theo.
+3. Gom logic vào `apDungHienThanhSo(chromeDangAn)`; `setUiHidden` và `setChromeHidden` gọi nó thay vì tự bật/tắt thanh sổ, nên ẩn UI (phím `H`) hay mở overlay danh sách trang **không làm thanh sổ tự hiện lại**.
+4. **Không nhớ trạng thái qua lần tải trang** — Sam bảo ẩn thì mở lên phải ẩn.
+
+### Verify
+
+- `npm run check` PASS (29 test), `deploy.sh` 8/8 cổng smoke.
+- `capture-dong-bo.mjs` **PASS 13 ảnh**, thêm 3 phép đo mới: lúc mở `notebookBar opacity = 0` và nút nhỏ nằm trong `#boardToolbar` cao `40px`; bấm một lần thì thanh sổ hiện và đọc được `SamNguyen 1 Đã đồng bộ 09:08`, nút có class `active`; bấm lần nữa `opacity` về `0`.
+- Hồi quy PASS: `capture-board` 11 ảnh, `capture-pages` 9 ảnh, `capture-but-cam-ung` 7 ảnh, `capture-so-ghi-chep --drive` 13 ảnh.
+- Coordinator tự mở xem ảnh `00a` (góc trái trống trơn) và `00b` (thanh sổ hiện sau khi bấm).
+
+### Bẫy của bộ smoke, đã sửa
+
+Bước dọn cuối của `capture-so-ghi-chep` có đăng nhập lại nên profile browser giữ cookie sang lần chạy sau, làm phép thử "chưa đăng nhập" mất nghĩa (đo được `coBang: true` ngay ở bước 1). Nay xoá cookie bằng `Network.clearBrowserCookies` **trước** lần điều hướng đầu tiên.
+
+### Dọn dẹp
+
+Đã đánh bia mộ 33 sổ QA do các vòng chạy thử sinh ra; kho hiện `0 sổ sống`. Không xoá cứng, không đụng Drive.
+
+---
+
 ## 2026-09-09 07:20 → 08:10 (Asia/Bangkok)
 
 - **Trace-ID**: `20260909-0720-samteachingvisual-dongbo-sqlite`

@@ -73,6 +73,7 @@ for (const id of [
   "syncNowBtn",
   "logoutBtn",
   "notebookBar",
+  "notebookToggleBtn",
   "notebookBtn",
   "notebookName",
   "syncStatus",

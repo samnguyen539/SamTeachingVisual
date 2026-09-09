@@ -13,7 +13,7 @@
 
   <p id="boardHint">Kéo chuột hoặc bút để viết • Bấm ☰ góc phải dưới hoặc phím H để hiện lại • F: toàn màn hình • Ctrl+Z: hoàn tác</p>
 
-  <nav id="notebookBar" class="notebook-bar" aria-label="Quản lý sổ ghi chép">
+  <nav id="notebookBar" class="notebook-bar ui-hidden" aria-label="Quản lý sổ ghi chép">
     <button type="button" id="notebookBtn" class="notebook-btn" aria-label="Quản lý sổ ghi chép" title="Quản lý sổ ghi chép">
       <span class="notebook-icon" aria-hidden="true">📓</span>
       <span id="notebookName" class="notebook-name">SamNguyen 1</span>
@@ -33,6 +33,7 @@
   </nav>
 
   <div id="boardToolbar" role="toolbar" aria-label="Thanh công cụ bảng đen">
+    <button type="button" id="notebookToggleBtn" class="tool-btn notebook-toggle-btn" aria-label="Hiện hoặc ẩn tên sổ và trạng thái đồng bộ" aria-pressed="false" title="Hiện tên sổ và trạng thái đồng bộ">📓</button>
     <button type="button" id="penBtn" class="tool-btn active" aria-label="Bút viết" title="Bút (P)">Bút</button>
     <button type="button" id="eraserBtn" class="tool-btn" aria-label="Tẩy xóa" title="Tẩy (E)">Tẩy</button>
 

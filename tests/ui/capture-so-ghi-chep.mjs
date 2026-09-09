@@ -65,6 +65,10 @@ async function main() {
     });
 
   // ── 1. Chưa đăng nhập thì không vào được bảng ───────────────────────────────
+  // Profile browser được tái dùng và bước dọn cuối có đăng nhập lại, nên phải
+  // xoá cookie TRƯỚC khi mở trang thì phép thử "chưa đăng nhập" mới có nghĩa.
+  await page.send("Network.enable");
+  await page.send("Network.clearBrowserCookies");
   await page.send("Page.navigate", { url: `${base}/` });
   await page.waitForFunction(() => document.readyState === "complete", 30000);
   await sleep(400);

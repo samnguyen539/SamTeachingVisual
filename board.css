@@ -336,6 +336,20 @@ html, body {
   transform: translateY(-100%);
 }
 
+/* Nút nhỏ dưới thanh công cụ để hiện/ẩn tên sổ và trạng thái đồng bộ.
+   Mặc định thanh sổ ẩn cho sạch màn hình khi quay. */
+.notebook-toggle-btn {
+  min-width: 44px;
+  padding: 0 10px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.notebook-toggle-btn.active {
+  border-color: rgba(255, 212, 59, 0.85);
+  background: rgba(255, 212, 59, 0.18);
+}
+
 .notebook-btn {
   display: inline-flex;
   align-items: center;

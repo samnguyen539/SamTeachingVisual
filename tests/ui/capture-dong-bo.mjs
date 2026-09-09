@@ -117,6 +117,49 @@ async function main() {
     // ── Máy A: đăng nhập, đặt tên sổ, vẽ ─────────────────────────────────────
     await dangNhapQuaGiaoDien(A.page, base);
     await A.moBang();
+
+    // Sam yêu cầu thanh sổ mặc định ẨN, chỉ hiện khi bấm nút nhỏ dưới thanh công cụ.
+    const thanhSoLucMo = await A.page.evaluate(() => {
+      const bar = document.getElementById("notebookBar");
+      const nut = document.getElementById("notebookToggleBtn");
+      const hop = nut.getBoundingClientRect();
+      return {
+        barOpacity: getComputedStyle(bar).opacity,
+        nutHien: getComputedStyle(nut).opacity !== "0" && hop.width > 0,
+        nutRong: Math.round(hop.width),
+        nutCao: Math.round(hop.height),
+        nutTrongThanhCongCu: Boolean(nut.closest("#boardToolbar")),
+        nhan: nut.textContent.trim()
+      };
+    });
+    measurements.thanhSoLucMo = thanhSoLucMo;
+    console.log("thanhSoLucMo:", JSON.stringify(thanhSoLucMo));
+    if (thanhSoLucMo.barOpacity !== "0") fail(`mở trang lên mà thanh sổ đã hiện sẵn (opacity=${thanhSoLucMo.barOpacity})`);
+    if (!thanhSoLucMo.nutHien) fail("không thấy nút nhỏ để hiện thanh sổ");
+    if (!thanhSoLucMo.nutTrongThanhCongCu) fail("nút hiện thanh sổ không nằm trong thanh công cụ phía dưới");
+    if (thanhSoLucMo.nutCao < 32) fail(`nút hiện thanh sổ cao chỉ ${thanhSoLucMo.nutCao}px, quá nhỏ để bấm`);
+    await A.shoot("00a-thanh-so-an-mac-dinh.png", `Mở lên: thanh sổ ẩn (opacity ${thanhSoLucMo.barOpacity}), chỉ còn nút nhỏ "${thanhSoLucMo.nhan}" ${thanhSoLucMo.nutRong}x${thanhSoLucMo.nutCao} trong thanh công cụ`);
+
+    await A.click("notebookToggleBtn");
+    await sleep(500);
+    const thanhSoSauBam = await A.page.evaluate(() => ({
+      barOpacity: getComputedStyle(document.getElementById("notebookBar")).opacity,
+      chu: document.getElementById("notebookBar").innerText.replace(/\s+/g, " ").trim(),
+      nutActive: document.getElementById("notebookToggleBtn").classList.contains("active")
+    }));
+    measurements.thanhSoSauBam = thanhSoSauBam;
+    console.log("thanhSoSauBam:", JSON.stringify(thanhSoSauBam));
+    if (thanhSoSauBam.barOpacity === "0") fail("bấm nút nhỏ mà thanh sổ vẫn không hiện");
+    if (!thanhSoSauBam.nutActive) fail("nút nhỏ không sáng lên khi thanh sổ đang hiện");
+    await A.shoot("00b-bam-nut-nho-thanh-so-hien.png", `Bấm nút nhỏ: thanh sổ hiện, đọc được "${thanhSoSauBam.chu}"`);
+
+    await A.click("notebookToggleBtn");
+    await sleep(500);
+    const thanhSoAnLai = await A.page.evaluate(() => getComputedStyle(document.getElementById("notebookBar")).opacity);
+    measurements.thanhSoAnLai = thanhSoAnLai;
+    if (thanhSoAnLai !== "0") fail(`bấm lần nữa mà thanh sổ không ẩn lại (opacity=${thanhSoAnLai})`);
+    await A.click("notebookToggleBtn");
+    await sleep(400);
     const trangThaiA = await A.trangThaiDongBo();
     measurements.trangThaiA = trangThaiA;
     console.log("trangThaiA:", JSON.stringify(trangThaiA));
