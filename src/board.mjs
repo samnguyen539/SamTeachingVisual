@@ -1,4 +1,5 @@
 import { DrawingBoard } from "./drawing.mjs";
+import { hopNhatSoTay } from "./hop-nhat-so-tay.mjs";
 
 // Service worker của studio đăng ký ở phạm vi "/" nên nó điều khiển luôn trang
 // bảng. Bản v1 dùng cache-trước-mạng-sau: deploy xong Sam tải lại vẫn chạy code
@@ -1286,7 +1287,12 @@ function apDungBanChuan(danhSachSoMoi) {
   const trangDangMoId = getCurrentPage(getCurrentNotebook())?.id ?? null;
   const netDangHienThi = JSON.stringify(board.exportScene().items ?? null);
 
-  notebooksData.so = danhSachSoMoi;
+  // ĐÈ nguyên mảng bằng câu trả lời của máy chủ là sai: một lượt PUT đang bay
+  // được dựng từ ảnh chụp TRƯỚC khi Sam thêm trang mới, nên câu trả lời của nó
+  // thiếu trang đó; đè vào là trang vừa tạo biến mất khỏi máy này. Đo được:
+  // "Trang 3/3" tụt xuống "Trang 1/2" sau 2 giây rồi tải lại còn "Trang 1/1"
+  // trống. Phải HỢP NHẤT bằng đúng luật máy chủ đang dùng.
+  notebooksData.so = hopNhatSoTay(notebooksData.so, danhSachSoMoi);
   const soSong = laySoSong(notebooksData);
   if (soSong.length === 0) {
     const defaultNb = createNewNotebook("SamNguyen 1");

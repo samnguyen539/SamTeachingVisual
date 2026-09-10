@@ -24,7 +24,17 @@ function hopNhatPhanTu(a, b, laSo = false) {
   let daXoa = false;
   let xoaLuc = null;
 
-  if (daXoaA && daXoaB) {
+  if (laSo) {
+    // Với SỔ, `suaLuc` không đáng tin để phá bia mộ: chỉ cần một máy có bản cũ
+    // chạm vào (đổi trang, tự sinh trang trắng) là `suaLuc` đã nhảy. Nên bia mộ
+    // luôn thắng ở tầng này, và chỉ được gỡ bởi phép kiểm nội dung bên dưới.
+    if (daXoaA || daXoaB) {
+      daXoa = true;
+      const xA = daXoaA ? layThoiGian(a, "xoaLuc") : "1970-01-01T00:00:00.000Z";
+      const xB = daXoaB ? layThoiGian(b, "xoaLuc") : "1970-01-01T00:00:00.000Z";
+      xoaLuc = xA > xB ? xA : xB;
+    }
+  } else if (daXoaA && daXoaB) {
     daXoa = true;
     const xA = layThoiGian(a, "xoaLuc");
     const xB = layThoiGian(b, "xoaLuc");
@@ -55,10 +65,16 @@ function hopNhatPhanTu(a, b, laSo = false) {
 
   if (laSo) {
     ketQua.trang = hopNhatDanhSach(a.trang || [], b.trang || [], false);
-    // Nếu có trang con sửa mới hơn xoaLuc thì sổ cũng sống lại
+    // Sổ đã xoá chỉ sống lại khi máy khác VẼ THẬT vào nó sau lúc xoá.
+    // Trước đây chỉ cần một trang còn sống và mới hơn `xoaLuc` là đủ, mà
+    // `getCurrentPage()` lại tự tạo trang trắng khi sổ hết trang — nên một máy
+    // có bản cũ trong bộ nhớ chỉ cần chạm vào là sổ đã xoá đội mồ sống dậy.
+    // Đo được: 50 sổ đã xoá quay lại kho, mỗi cái kèm vài trang trắng.
     if (ketQua.daXoa) {
-      const trangSongLai = ketQua.trang.some((t) => !t.daXoa && layThoiGian(t, "suaLuc") > layThoiGian(ketQua, "xoaLuc"));
-      if (trangSongLai) {
+      const coNoiDungMoi = ketQua.trang.some(
+        (t) => !t.daXoa && (t.scene?.items?.length || 0) > 0 && layThoiGian(t, "suaLuc") > layThoiGian(ketQua, "xoaLuc")
+      );
+      if (coNoiDungMoi) {
         ketQua.daXoa = false;
         ketQua.xoaLuc = null;
       }

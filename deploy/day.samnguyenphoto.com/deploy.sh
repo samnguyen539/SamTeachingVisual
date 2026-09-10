@@ -17,7 +17,7 @@ echo "==> [1/11] Chạy npm run build tại gốc repo..."
 
 # 2. Đóng gói dist/ + các script runtime cần thiết bằng tar czf - rồi ssh gửi sang TARGET
 echo "==> [2/11] Đóng gói dist/ và scripts runtime, đẩy lên $REMOTE:$TARGET..."
-tar -czf - -C "$REPO_ROOT" dist scripts/serve.mjs scripts/drive-upload.mjs scripts/api-luu-drive.mjs scripts/xac-thuc.mjs scripts/api-dang-nhap.mjs scripts/hop-nhat-so-tay.mjs scripts/api-so-tay.mjs | ssh "$REMOTE" "mkdir -p '$TARGET' && tar -xzf - -C '$TARGET'"
+tar -czf - -C "$REPO_ROOT" dist scripts/serve.mjs scripts/drive-upload.mjs scripts/api-luu-drive.mjs scripts/xac-thuc.mjs scripts/api-dang-nhap.mjs scripts/api-so-tay.mjs src/hop-nhat-so-tay.mjs | ssh "$REMOTE" "mkdir -p '$TARGET' && tar -xzf - -C '$TARGET'"
 
 # 3. Cấu hình biến môi trường đăng nhập (/etc/sam-teaching-visual-day.env)
 echo "==> [3/11] Kiểm tra và thiết lập file cấu hình đăng nhập trên VPS..."

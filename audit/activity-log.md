@@ -4,6 +4,39 @@ Nhật ký thực thi canonical của repo này. Mỗi thay đổi mã, cấu h�
 
 ---
 
+## 2026-09-10 20:45 → 21:20 (Asia/Bangkok)
+
+- **Trace-ID**: `20260910-2045-samteachingvisual-mat-trang-khi-dong-bo`
+- **system_id**: `SamTeachingVisual`
+- **Request**: Sam vẫn báo nhảy về trang 1 sau bản vá trước, rồi *"nhảy khi tôi đang ở trang khác"*, và *"giờ check kỹ xem okie chưa?"*.
+
+### Tái hiện đúng cảnh Sam gặp
+
+Bộ mới `tests/ui/capture-giu-trang.mjs`: tạo 3 trang, sang trang 3, vẽ, rồi **ngồi im 60 giây không bấm gì**, lấy mẫu nhãn trang mỗi 2 giây. Kết quả trước khi sửa: **`Trang 3/3` tụt xuống `Trang 1/2` chỉ sau 2 giây, 30/30 mẫu đều sai** — và số trang giảm từ 3 xuống 2, tức **mất hẳn một trang**. Tải lại còn `Trang 1/1` trống. Nặng hơn báo cáo của Sam.
+
+### Ba tầng nguyên nhân, sửa cả ba
+
+1. **Áp mù câu trả lời của máy chủ đè lên dữ liệu cục bộ.** Một lượt `PUT` đang bay được dựng từ ảnh chụp TRƯỚC khi Sam thêm trang mới; câu trả lời của nó dĩ nhiên thiếu trang đó, và `apDungBanChuan()` lấy nguyên nó **thay** mảng cục bộ → trang vừa tạo bốc hơi. Sửa: **hợp nhất** câu trả lời vào dữ liệu cục bộ bằng đúng hàm máy chủ đang dùng. Module hợp nhất chuyển từ `scripts/` sang `src/hop-nhat-so-tay.mjs` để cả máy chủ và trình duyệt dùng **một bản duy nhất**; `deploy.sh` gói thêm file này.
+2. **`trangHienTai` bị mất khi thay mảng** (đã sửa ở lượt trước): nhớ theo ID sổ + ID trang rồi đặt lại.
+3. **Service worker phục vụ code cũ**: `sw.js` v1 `cache || network` ở phạm vi `/` nên bản vá luôn tới chậm một lần deploy. v2 mạng-trước + loại hẳn trang bảng/API/đăng nhập; trang bảng còn tự gỡ service worker và xoá cache.
+
+### Lỗi thứ tư lộ ra khi hồi quy: sổ đã xoá đội mồ sống dậy
+
+Sau khi bật hợp nhất phía client, **50 sổ đã xoá quay lại kho**. Luật cũ: bia mộ thua nếu bên kia có `suaLuc` mới hơn `xoaLuc`. Mà `suaLuc` của sổ nhảy chỉ vì **chạm vào** — `getCurrentPage()` tự tạo một trang trắng khi sổ hết trang là đủ để hồi sinh. Sửa trong `src/hop-nhat-so-tay.mjs`: với **sổ**, bia mộ luôn thắng ở tầng so `suaLuc`; chỉ được gỡ khi có **trang còn sống, CÓ NÉT VẼ, và sửa sau `xoaLuc`**. Thêm 2 test: `7. Trang trắng tự sinh KHÔNG được làm sổ đã xoá sống lại` và `8. Vẽ thật vào sổ đã xoá thì sổ vẫn sống lại`. Tổng **31 test**.
+
+### Verify
+
+- `npm run check` PASS 31 test. `deploy.sh` 8/8 cổng smoke.
+- `capture-giu-trang.mjs` **PASS 5 ảnh**: ngồi im 60 giây (30 mẫu) vẫn `Trang 3/3` · vẽ thêm rồi chờ 20 giây vẫn `Trang 3/3` · rời tab rồi quay lại vẫn `Trang 3/3` · **tải lại trang vẫn `Trang 3/3`**, nét `12028` pixel sáng không đổi.
+- Hồi quy **PASS**: `capture-board` 11 ảnh · `capture-pages` 10 ảnh (có phép đo `08b`) · `capture-but-cam-ung` 7 ảnh · `capture-dong-bo` 13 ảnh · `capture-so-ghi-chep --drive` 13 ảnh.
+- Bộ smoke hai máy sửa hai bẫy: profile browser tái dùng làm dữ liệu lượt cũ đẩy ngược lên kho (nay mỗi lượt một thư mục profile riêng, không xoá thư mục cũ vì Edge còn giữ khoá file trên Windows), và đọc trạng thái đồng bộ quá sớm (nay chờ `data-trang-thai !== "dang"`).
+
+### Kho sau khi dọn
+
+`SamNguyen 1` **17 trang / 994 nét**, `SamNguyen 1` **2 trang / 7 nét**, `dinhvi` **4 trang / 170 nét**. Luật dọn từ nay: **giữ mọi sổ có ≥ 5 nét**, chỉ đánh bia mộ sổ rỗng — không bao giờ lọc bằng khuôn tên nữa.
+
+---
+
 ## 2026-09-10 20:20 → 20:45 (Asia/Bangkok)
 
 - **Trace-ID**: `20260910-2020-samteachingvisual-nhay-trang-1`

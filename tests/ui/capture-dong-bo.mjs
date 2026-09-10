@@ -69,7 +69,9 @@ function taoMay(ten, session) {
       await page.send("Page.navigate", { url: `${base}/` });
       await page.waitForFunction(() => document.readyState === "complete", 30000);
       await page.waitForFunction(() => Boolean(document.getElementById("boardCanvas")), 20000);
-      await sleep(1500); // chờ vòng đồng bộ lúc nạp trang chạy xong
+      // Chờ đúng lúc vòng đồng bộ lúc nạp trang chạy xong, không đoán bằng sleep.
+      await page.waitForFunction(() => document.getElementById("syncStatus")?.dataset.trangThai !== "dang", 60000);
+      await sleep(600);
     },
     async doiTenSoDangMo(tenMoi) {
       await page.evaluate(new Function(`window.prompt = () => ${JSON.stringify(tenMoi)};`));
@@ -108,8 +110,11 @@ const cung = (x0, y0, rong, cao, buoc = 26) =>
   });
 
 async function main() {
-  const phienA = await launchWindowsGpuBrowser({ profileDir: path.join(outDir, ".profile-may-a"), width: 1440, height: 900 });
-  const phienB = await launchWindowsGpuBrowser({ profileDir: path.join(outDir, ".profile-may-b"), width: 1440, height: 900 });
+  // Hai máy phải THẬT SỰ mới: profile cũ còn dữ liệu lượt trước sẽ đẩy ngược sổ
+  // cũ lên kho. Không xoá thư mục cũ (Edge còn giữ khoá file trên Windows) mà
+  // dùng hẳn thư mục mới cho mỗi lượt chạy.
+  const phienA = await launchWindowsGpuBrowser({ profileDir: path.join(outDir, `.profile-may-a-${dau}`), width: 1440, height: 900 });
+  const phienB = await launchWindowsGpuBrowser({ profileDir: path.join(outDir, `.profile-may-b-${dau}`), width: 1440, height: 900 });
   const A = taoMay("Máy A", phienA);
   const B = taoMay("Máy B", phienB);
 

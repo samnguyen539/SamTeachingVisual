@@ -1,7 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import fs from "node:fs";
 import path from "node:path";
-import { hopNhatSoTay, chuanHoaSo } from "./hop-nhat-so-tay.mjs";
+import { hopNhatSoTay, chuanHoaSo } from "../src/hop-nhat-so-tay.mjs";
 
 const MAX_BODY_BYTES = 25 * 1024 * 1024;
 let dbInstance = null;

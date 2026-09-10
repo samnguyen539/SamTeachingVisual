@@ -1,0 +1,68 @@
+{
+  "base": "https://day.samnguyenphoto.com",
+  "tenSoNhap": "QA giutrang la509",
+  "capturedAt": "2026-09-10T13:56:34.074Z",
+  "problems": [],
+  "measurements": {
+    "banDau": {
+      "nhan": "Trang 3/3",
+      "lit": 6457
+    },
+    "ngoiIm": {
+      "soMau": 30,
+      "lech": [],
+      "mauCuoi": {
+        "giay": 60,
+        "nhan": "Trang 3/3",
+        "lit": 6457
+      }
+    },
+    "veRoiCho": {
+      "sauVe": {
+        "nhan": "Trang 3/3",
+        "lit": 12028
+      },
+      "lech": [],
+      "mauCuoi": {
+        "giay": 20,
+        "nhan": "Trang 3/3",
+        "lit": 12028
+      }
+    },
+    "sauDoiTab": {
+      "nhan": "Trang 3/3",
+      "lit": 12028
+    },
+    "sauTaiLai": {
+      "nhan": "Trang 3/3",
+      "lit": 12028
+    }
+  },
+  "shots": [
+    {
+      "file": "01-dang-o-trang-3.png",
+      "capturedAt": "2026-09-10T13:55:03.440Z",
+      "expected": "Đang ở \"Trang 3/3\", pixel sáng 6457"
+    },
+    {
+      "file": "02-ngoi-im-60-giay.png",
+      "capturedAt": "2026-09-10T13:56:03.858Z",
+      "expected": "Sau 60 giây không bấm gì: \"Trang 3/3\", pixel sáng 6457"
+    },
+    {
+      "file": "03-ve-roi-cho-dong-bo.png",
+      "capturedAt": "2026-09-10T13:56:24.231Z",
+      "expected": "Vẽ thêm ở \"Trang 3/3\" rồi chờ 20 giây: vẫn \"Trang 3/3\", pixel sáng 12028"
+    },
+    {
+      "file": "04-roi-tab-roi-quay-lai.png",
+      "capturedAt": "2026-09-10T13:56:29.823Z",
+      "expected": "Rời tab rồi quay lại: vẫn \"Trang 3/3\", pixel sáng 12028"
+    },
+    {
+      "file": "05-tai-lai-van-dung-trang.png",
+      "capturedAt": "2026-09-10T13:56:34.074Z",
+      "expected": "Tải lại trang: vẫn \"Trang 3/3\", pixel sáng 12028"
+    }
+  ]
+}
