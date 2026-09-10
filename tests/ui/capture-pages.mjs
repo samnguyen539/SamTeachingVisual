@@ -229,6 +229,31 @@ async function main() {
   if (afterReload.lit <= 0) fail("tải lại trang là mất hết nét vẽ");
   await shoot("08-tai-lai-van-con-2-trang.png", `Sau khi tải lại: "${afterReload.label}", pixel sáng ${afterReload.lit}`);
 
+  // ── 6b. Đồng bộ KHÔNG được kéo bảng nhảy về trang 1 ────────────────────────
+  // Sam báo đang dạy thì bảng cứ nhảy về trang 1: mỗi lượt đồng bộ thay nguyên
+  // mảng sổ bằng bản máy chủ, mà `trangHienTai` là thứ không đồng bộ nên mất.
+  await click("nextPageBtn");
+  await sleep(400);
+  const truocDongBo = { label: await label(), lit: await lit() };
+  const sauMoiLuot = [];
+  for (let luot = 1; luot <= 3; luot += 1) {
+    await page.evaluate(() => document.getElementById("syncNowBtn").click());
+    await page.waitForFunction(() => document.getElementById("syncStatus").dataset.trangThai !== "dang", 60000);
+    await sleep(700);
+    sauMoiLuot.push({ label: await label(), lit: await lit() });
+  }
+  measurements.giuTrangKhiDongBo = { truocDongBo, sauMoiLuot };
+  console.log("giuTrangKhiDongBo:", JSON.stringify(measurements.giuTrangKhiDongBo));
+  for (const [chiSo, sau] of sauMoiLuot.entries()) {
+    if (sau.label !== truocDongBo.label) {
+      fail(`đồng bộ lượt ${chiSo + 1} kéo bảng khỏi "${truocDongBo.label}" về "${sau.label}"`);
+    }
+    if (Math.abs(sau.lit - truocDongBo.lit) > 60) {
+      fail(`đồng bộ lượt ${chiSo + 1} làm đổi nét đang hiển thị: ${truocDongBo.lit} -> ${sau.lit}`);
+    }
+  }
+  await shoot("08b-dong-bo-khong-nhay-ve-trang-1.png", `Ở "${truocDongBo.label}", đồng bộ 3 lượt vẫn đứng nguyên trang, pixel sáng ${sauMoiLuot.map((s) => s.lit).join(" → ")}`);
+
   // ── 7. Lưu tất cả lên Drive (chỉ khi có --drive) ───────────────────────────
   if (runDrive) {
     await click("saveDriveBtn");

@@ -1252,20 +1252,41 @@ function baoCoThayDoi() {
 
 function apDungBanChuan(danhSachSoMoi) {
   if (!Array.isArray(danhSachSoMoi)) return;
+
+  // `trangHienTai` là lựa chọn riêng của máy nên KHÔNG nằm trong dữ liệu máy
+  // chủ. Trước đây thay nguyên mảng sổ là mất nó, `getCurrentPage` đặt lại 0 và
+  // Sam đang dạy thì bảng nhảy về trang 1 sau mỗi lượt đồng bộ (3 giây một lần).
+  // Nhớ theo ID của sổ và của trang, rồi đặt lại đúng chỗ cũ.
+  const soDangMoId = notebooksData.soHienTai;
+  const trangDangMoId = getCurrentPage(getCurrentNotebook())?.id ?? null;
+  const netDangHienThi = JSON.stringify(board.exportScene().items ?? null);
+
   notebooksData.so = danhSachSoMoi;
   const soSong = laySoSong(notebooksData);
   if (soSong.length === 0) {
     const defaultNb = createNewNotebook("SamNguyen 1");
     notebooksData.so.push(defaultNb);
     notebooksData.soHienTai = defaultNb.id;
+  } else if (soSong.some((s) => s.id === soDangMoId)) {
+    notebooksData.soHienTai = soDangMoId;
   } else if (!soSong.some((s) => s.id === notebooksData.soHienTai)) {
     notebooksData.soHienTai = soSong[0].id;
   }
+
   currentNotebook = getCurrentNotebook();
+  const trangSong = layTrangSong(currentNotebook);
+  const viTriCu = trangSong.findIndex((trang) => trang.id === trangDangMoId);
+  if (viTriCu >= 0) currentNotebook.trangHienTai = viTriCu;
+  else if (trangSong.length) currentNotebook.trangHienTai = Math.min(currentNotebook.trangHienTai ?? 0, trangSong.length - 1);
+
   const curPage = getCurrentPage(currentNotebook);
-  if (curPage?.scene) {
+  // Chỉ vẽ lại khi nét thật sự khác, và không bao giờ cắt ngang lúc Sam đang
+  // kéo một nét dở — `board.active` khác null nghĩa là con trỏ đang xuống.
+  const netMoi = JSON.stringify(curPage?.scene?.items ?? null);
+  if (curPage?.scene && netMoi !== netDangHienThi && !board.active) {
     board.importScene(curPage.scene);
   }
+
   localStorage.setItem("sam-bang-den-so-tay", JSON.stringify(notebooksData));
   updateNotebookBar();
   updatePageBar();

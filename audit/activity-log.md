@@ -4,6 +4,42 @@ Nhật ký thực thi canonical của repo này. Mỗi thay đổi mã, cấu h�
 
 ---
 
+## 2026-09-10 20:20 → 20:45 (Asia/Bangkok)
+
+- **Trace-ID**: `20260910-2020-samteachingvisual-nhay-trang-1`
+- **system_id**: `SamTeachingVisual`
+- **Request**: Sam đang dạy, báo *"bị lỗi thường xuyên nhảy về trang 1, hãy fix giúp tôi ổn định"*.
+
+### Nguyên nhân
+
+`apDungBanChuan()` thay **nguyên mảng sổ** bằng bản từ máy chủ. `trangHienTai` là lựa chọn riêng của từng máy nên **không** nằm trong dữ liệu máy chủ → mất → `getCurrentPage()` đặt lại `0`. Vòng đồng bộ chạy 3 giây một lần sau khi vẽ, mỗi lần lại kéo bảng về trang 1.
+
+### Sửa
+
+- Trước khi thay mảng, nhớ **ID** của sổ đang mở và **ID** của trang đang mở; sau khi thay, tìm lại đúng trang theo ID rồi đặt lại `trangHienTai`. Trang bị xoá ở máy khác thì kẹp về chỉ số hợp lệ.
+- Chỉ `importScene` khi nét thật sự khác bản đang hiển thị, và **không bao giờ** khi `board.active` khác `null` (Sam đang kéo một nét dở) — trước đây mỗi lượt đồng bộ đều vẽ lại, gây nháy và có thể cắt ngang nét.
+
+### Verify
+
+- `npm run check` PASS, deploy PASS.
+- Test hồi quy mới trong `capture-pages.mjs`: đứng ở `Trang 2/2`, bấm `Đồng bộ` **3 lượt** → nhãn vẫn `Trang 2/2` cả 3 lần, pixel sáng `6159 → 6159 → 6159`. Ảnh `08b-dong-bo-khong-nhay-ve-trang-1.png`.
+- Hồi quy PASS: `capture-board` 11 ảnh, `capture-dong-bo` 13 ảnh.
+
+### SỰ CỐ TÔI GÂY RA — xoá nhầm sổ Sam đang dạy
+
+Bước dọn sổ QA sau khi test dùng bộ lọc `^(MayA |MayB |QA )` **hoặc `^SamNguyen \d+$`**. Vế thứ hai quá thô: nó khớp luôn sổ **`SamNguyen 1` của Sam, 17 trang, 994 nét, tạo lúc 12:33 hôm nay** — chính buổi dạy đang diễn ra. 42 sổ bị đánh bia mộ, trong đó có sổ đó.
+
+**Đã khôi phục ngay**: bỏ `daXoa`/`xoaLuc` và đặt `suaLuc` mới hơn để bản hồi sinh thắng khi hợp nhất; `PUT` lần đầu trả lỗi SSL 35, thử lại thì `HTTP 200`. Kiểm lại kho: `SamNguyen 1` **17 trang / 994 nét** đã sống lại, `dinhvi` **4 trang / 138 nét** chưa bao giờ bị đụng.
+
+Bài học, phải nhớ: **không bao giờ lọc dữ liệu thật bằng khuôn tên**. Bộ dọn chỉ được xoá đúng những ID do chính bộ test tạo ra trong lượt chạy đó, và phải bỏ qua mọi sổ có nét vẽ. Cấu trúc bia mộ là thứ đã cứu vãn — nếu dùng `files.delete`/xoá cứng thì mất trắng.
+
+### Next
+
+- Viết lại bước dọn theo danh sách ID của chính lượt chạy, không theo tên.
+- Còn một `SamNguyen 1` (2 trang / 6 nét) là rác QA từ 09/09 đang sống trong kho; **không tự xoá nữa**, để Sam tự quyết.
+
+---
+
 ## 2026-09-09 09:00 → 09:20 (Asia/Bangkok)
 
 - **Trace-ID**: `20260909-0900-samteachingvisual-an-thanh-so`
