@@ -1,5 +1,30 @@
 import { DrawingBoard } from "./drawing.mjs";
 
+// Service worker của studio đăng ký ở phạm vi "/" nên nó điều khiển luôn trang
+// bảng. Bản v1 dùng cache-trước-mạng-sau: deploy xong Sam tải lại vẫn chạy code
+// CŨ, luôn chậm một bản — đó là lý do bản vá "nhảy về trang 1" không tới được
+// máy Sam. Trang bảng không cần chạy offline, nên gỡ hẳn service worker khỏi nó
+// và xoá cache; nếu đang bị điều khiển thì tải lại đúng MỘT lần cho mỗi tab.
+(function goBoServiceWorkerCu() {
+  if (!("serviceWorker" in navigator)) return;
+  const dangBiDieuKhien = Boolean(navigator.serviceWorker.controller);
+  navigator.serviceWorker
+    .getRegistrations()
+    .then((danhSach) => Promise.all(danhSach.map((dangKy) => dangKy.unregister())))
+    .then(() => (window.caches ? caches.keys().then((ten) => Promise.all(ten.map((t) => caches.delete(t)))) : null))
+    .then(() => {
+      if (!dangBiDieuKhien) return;
+      try {
+        if (sessionStorage.getItem("sam-bang-den-da-go-sw")) return;
+        sessionStorage.setItem("sam-bang-den-da-go-sw", "1");
+      } catch {
+        return;
+      }
+      location.reload();
+    })
+    .catch(() => {});
+})();
+
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => document.querySelectorAll(selector);
 
