@@ -5,6 +5,8 @@ node_modules/
 *.mp4
 *.webm
 render-output/
+.browser-profile/
+.profile-may-*/
 .env
 .env.*
 !.env.example

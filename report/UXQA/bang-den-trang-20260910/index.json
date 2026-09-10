@@ -1,0 +1,123 @@
+{
+  "base": "https://day.samnguyenphoto.com",
+  "runDrive": false,
+  "capturedAt": "2026-09-10T13:58:08.673Z",
+  "problems": [],
+  "measurements": {
+    "start": {
+      "label": "Trang 1/1",
+      "prevDisabled": true,
+      "nextDisabled": true,
+      "restoreVisible": false
+    },
+    "afterAdd": {
+      "label": "Trang 2/2",
+      "lit": 0
+    },
+    "backTo1": {
+      "label": "Trang 1/2",
+      "lit": 6292
+    },
+    "overview": {
+      "opacity": "1",
+      "hidden": false,
+      "thumbs": 2,
+      "thumbsWithInk": 2,
+      "text": "Trang 1 1 nét • 20:57 10/09 Xoá Trang 2 1 nét • 20:57 10/09 Xoá",
+      "background": "rgba(0, 0, 0, 0.97)",
+      "toolbarOpacity": "0",
+      "pageBarOpacity": "0",
+      "hintOpacity": "0"
+    },
+    "jumped": {
+      "label": "Trang 2/2",
+      "overlayHidden": true,
+      "toolbarOpacity": "1",
+      "pageBarOpacity": "1",
+      "lit": 6159
+    },
+    "restore": {
+      "toolbarOpacity": "0",
+      "pageBarOpacity": "0",
+      "hintOpacity": "0",
+      "opacity": 0.8,
+      "width": 164,
+      "height": 40,
+      "insideViewport": true,
+      "text": "☰ Hiện thanh công cụ",
+      "pointerEvents": "auto"
+    },
+    "restoredOpacity": "1",
+    "afterReload": {
+      "label": "Trang 2/2",
+      "lit": 6159
+    },
+    "giuTrangKhiDongBo": {
+      "truocDongBo": {
+        "label": "Trang 2/2",
+        "lit": 6159
+      },
+      "sauMoiLuot": [
+        {
+          "label": "Trang 2/2",
+          "lit": 6159
+        },
+        {
+          "label": "Trang 2/2",
+          "lit": 6159
+        },
+        {
+          "label": "Trang 2/2",
+          "lit": 6159
+        }
+      ]
+    }
+  },
+  "shots": [
+    {
+      "file": "01-trang1-co-net.png",
+      "capturedAt": "2026-09-10T13:57:31.354Z",
+      "expected": "Trang 1/1, một nét trắng, pixel sáng 6297"
+    },
+    {
+      "file": "02-trang2-moi-co-net-khac.png",
+      "capturedAt": "2026-09-10T13:57:32.043Z",
+      "expected": "Trang 2/2, nét khác hẳn trang 1, pixel sáng 6159"
+    },
+    {
+      "file": "03-quay-lai-trang1.png",
+      "capturedAt": "2026-09-10T13:57:32.539Z",
+      "expected": "Trang 1/2, nét cũ còn nguyên, pixel sáng 6292"
+    },
+    {
+      "file": "04-xem-lai-cac-trang.png",
+      "capturedAt": "2026-09-10T13:57:33.219Z",
+      "expected": "Overlay 2 ô xem trước đều có nét: \"Trang 1 1 nét • 20:57 10/09 Xoá Trang 2 1 nét • 20:57 10/09 Xoá\""
+    },
+    {
+      "file": "05-mo-trang-tu-danh-sach.png",
+      "capturedAt": "2026-09-10T13:57:33.809Z",
+      "expected": "Mở Trang 2/2 từ danh sách, pixel sáng 6159"
+    },
+    {
+      "file": "06-an-ui-nut-mo-lai-ro-rang.png",
+      "capturedAt": "2026-09-10T13:57:34.393Z",
+      "expected": "UI đã ẩn, nút mở lại opacity=0.8 164x40 chữ \"☰ Hiện thanh công cụ\""
+    },
+    {
+      "file": "07-mo-lai-thanh-cong-cu.png",
+      "capturedAt": "2026-09-10T13:57:35.001Z",
+      "expected": "Thanh công cụ hiện lại, opacity=1"
+    },
+    {
+      "file": "08-tai-lai-van-con-2-trang.png",
+      "capturedAt": "2026-09-10T13:57:38.834Z",
+      "expected": "Sau khi tải lại: \"Trang 2/2\", pixel sáng 6159"
+    },
+    {
+      "file": "08b-dong-bo-khong-nhay-ve-trang-1.png",
+      "capturedAt": "2026-09-10T13:58:08.673Z",
+      "expected": "Ở \"Trang 2/2\", đồng bộ 3 lượt vẫn đứng nguyên trang, pixel sáng 6159 → 6159 → 6159"
+    }
+  ]
+}

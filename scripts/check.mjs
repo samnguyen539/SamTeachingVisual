@@ -1,8 +1,9 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = path.resolve(new URL("..", import.meta.url).pathname);
+const root = fileURLToPath(new URL("..", import.meta.url));
 const ignored = new Set([".git", "dist", "node_modules"]);
 const files = [];
 
@@ -44,5 +45,49 @@ for (const file of files.filter((item) => /\.(?:m?js|json|html|css|md|txt|yml|ya
 const html = await readFile(path.join(root, "index.html"), "utf8");
 for (const id of ["drawingCanvas", "recordBtn", "uploadDriveBtn", "markerList", "mediaInput"]) {
   if (!html.includes(`id="${id}"`)) throw new Error(`Missing required UI element #${id}`);
+}
+
+const boardHtml = await readFile(path.join(root, "board.html"), "utf8");
+for (const id of [
+  "boardCanvas",
+  "boardToolbar",
+  "penBtn",
+  "eraserBtn",
+  "undoBtn",
+  "clearBtn",
+  "fullscreenBtn",
+  "hideUiBtn",
+  "saveImageBtn",
+  "colorSwatches",
+  "widthRange",
+  "boardRestoreBtn",
+  "pageBar",
+  "prevPageBtn",
+  "nextPageBtn",
+  "pageLabel",
+  "addPageBtn",
+  "pagesBtn",
+  "pageOverview",
+  "saveDriveBtn",
+  "copyDriveLinkBtn",
+  "syncNowBtn",
+  "logoutBtn",
+  "notebookBar",
+  "notebookToggleBtn",
+  "notebookBtn",
+  "notebookName",
+  "syncStatus",
+  "notebookManager",
+  "notebookList",
+  "addNotebookBtn",
+  "closeNotebookBtn",
+  "boardToast"
+]) {
+  if (!boardHtml.includes(`id="${id}"`)) throw new Error(`Missing required UI element #${id} in board.html`);
+}
+
+const boardCss = await readFile(path.join(root, "board.css"), "utf8");
+if (!boardCss.includes("touch-action")) {
+  throw new Error("Missing touch-action in board.css (required for stylus/touch drawing)");
 }
 console.log(`Checked ${scripts.length} scripts and ${files.length} repository files; no workflows or credentials found.`);

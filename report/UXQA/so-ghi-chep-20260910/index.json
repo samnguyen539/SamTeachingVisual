@@ -1,0 +1,171 @@
+{
+  "base": "https://day.samnguyenphoto.com",
+  "runDrive": true,
+  "tenSoThu": "QA Sổ 202609101407",
+  "capturedAt": "2026-09-10T14:08:02.807Z",
+  "problems": [],
+  "measurements": {
+    "chuaDangNhap": {
+      "url": "/dang-nhap",
+      "coForm": true,
+      "coBang": false,
+      "tieuDe": "Bảng đen — Sam Teaching Visual"
+    },
+    "saiMatKhau": {
+      "thongBao": "Sai tài khoản hoặc mật khẩu.",
+      "conForm": true
+    },
+    "sauDangNhap": {
+      "coBang": true,
+      "tenSo": "SamNguyen 1",
+      "tieuDe": "Bảng đen — Sam Teaching Visual"
+    },
+    "soMacDinh": "SamNguyen 1",
+    "soThuHai": {
+      "ten": "SamNguyen 2",
+      "promptDaHoi": [
+        {
+          "cauHoi": "Nhập tên sổ ghi chép mới:",
+          "macDinh": "SamNguyen 2"
+        }
+      ]
+    },
+    "doiTen": {
+      "tenTrenThanh": "QA Sổ 202609101407",
+      "danhSach": [
+        "SamNguyen 1",
+        "SamNguyen 1",
+        "dinhvi",
+        "MayA llht3",
+        "SamNguyen 1",
+        "MayA lmbbd",
+        "SamNguyen 1",
+        "MayB lmbbd",
+        "MayA lp3ol",
+        "SamNguyen 1",
+        "SamNguyen 1",
+        "SamNguyen 1",
+        "QA Sổ 202609101407"
+      ]
+    },
+    "veSoMot": {
+      "ten": "SamNguyen 1",
+      "lit": 5253,
+      "trang": "Trang 1/2"
+    },
+    "chong_desktop": {
+      "soVsTrang": 0,
+      "soVsGoiY": 0,
+      "trangVsGoiY": 0,
+      "soTrongKhung": true,
+      "tranNgang": 0
+    },
+    "chong_mobile": {
+      "soVsTrang": 0,
+      "soVsGoiY": 0,
+      "trangVsGoiY": 0,
+      "soTrongKhung": true,
+      "tranNgang": 0
+    },
+    "luuLan1": {
+      "message": "Đã lưu sổ \"SamNguyen 1\": 1 trang mới, 0 trang cập nhật, 1 trang không đổi.",
+      "links": [
+        "https://drive.google.com/drive/folders/1SG6SXFMgcmVBy-e9iFDv2uerzwdoDCgV"
+      ],
+      "nhanHanhDong": [
+        "Mở thư mục Drive",
+        "Sao chép link"
+      ]
+    },
+    "copyLink": {
+      "nutCopy": {
+        "disabled": false,
+        "nhan": "Sao chép link"
+      },
+      "clipboard": "https://drive.google.com/drive/folders/1SG6SXFMgcmVBy-e9iFDv2uerzwdoDCgV",
+      "nhanSauCopy": "Đã sao chép"
+    },
+    "luuLan2": {
+      "message": "Đã lưu sổ \"SamNguyen 1\": 0 trang mới, 1 trang cập nhật, 1 trang không đổi.",
+      "links": [
+        "https://drive.google.com/drive/folders/1SG6SXFMgcmVBy-e9iFDv2uerzwdoDCgV"
+      ],
+      "nhanHanhDong": [
+        "Mở thư mục Drive",
+        "Sao chép link"
+      ]
+    },
+    "sauDangXuat": {
+      "duongDan": "/dang-nhap",
+      "coForm": true
+    },
+    "vaoLaiSauDangXuat": 0
+  },
+  "shots": [
+    {
+      "file": "01-chua-dang-nhap-bi-chan.png",
+      "capturedAt": "2026-09-10T14:07:27.018Z",
+      "expected": "Vào \"/\" khi chưa đăng nhập thì bị đẩy sang /dang-nhap, có form đăng nhập"
+    },
+    {
+      "file": "02-sai-mat-khau.png",
+      "capturedAt": "2026-09-10T14:07:28.331Z",
+      "expected": "Sai mật khẩu bị chặn, báo: \"Sai tài khoản hoặc mật khẩu.\""
+    },
+    {
+      "file": "03-dang-nhap-thanh-cong.png",
+      "capturedAt": "2026-09-10T14:07:31.533Z",
+      "expected": "Đăng nhập bằng tài khoản \"samnguyen\" vào thẳng bảng, sổ đang mở \"SamNguyen 1\""
+    },
+    {
+      "file": "04-so-mac-dinh-samnguyen-1.png",
+      "capturedAt": "2026-09-10T14:07:37.097Z",
+      "expected": "Máy vừa xoá dữ liệu cục bộ vẫn kéo lại được sổ từ máy chủ, đang mở \"SamNguyen 1\""
+    },
+    {
+      "file": "05-so-moi-samnguyen-2.png",
+      "capturedAt": "2026-09-10T14:07:38.476Z",
+      "expected": "Bỏ trống tên → tự sinh \"SamNguyen 2\", bảng trắng rồi vẽ nét riêng"
+    },
+    {
+      "file": "06-quan-ly-so-doi-ten.png",
+      "capturedAt": "2026-09-10T14:07:39.465Z",
+      "expected": "Trình quản lý sổ: SamNguyen 1 | SamNguyen 1 | dinhvi | MayA llht3 | SamNguyen 1 | MayA lmbbd | SamNguyen 1 | MayB lmbbd | MayA lp3ol | SamNguyen 1 | SamNguyen 1 | SamNguyen 1 | QA Sổ 202609101407"
+    },
+    {
+      "file": "07-chuyen-so-net-rieng.png",
+      "capturedAt": "2026-09-10T14:07:40.160Z",
+      "expected": "Về sổ \"SamNguyen 1\", Trang 1/2, pixel sáng 5253 — nét riêng của sổ này"
+    },
+    {
+      "file": "08-desktop-ba-thanh-khong-de-nhau.png",
+      "capturedAt": "2026-09-10T14:07:40.637Z",
+      "expected": "desktop 1440x900: sổ/trang/gợi ý không đè nhau, tràn ngang 0px"
+    },
+    {
+      "file": "08-mobile-ba-thanh-khong-de-nhau.png",
+      "capturedAt": "2026-09-10T14:07:41.137Z",
+      "expected": "mobile 390x844: sổ/trang/gợi ý không đè nhau, tràn ngang 0px"
+    },
+    {
+      "file": "09-luu-drive-lan-1.png",
+      "capturedAt": "2026-09-10T14:07:50.815Z",
+      "expected": "Lần 1: \"Đã lưu sổ \"SamNguyen 1\": 1 trang mới, 0 trang cập nhật, 1 trang không đổi.\" · https://drive.google.com/drive/folders/1SG6SXFMgcmVBy-e9iFDv2uerzwdoDCgV"
+    },
+    {
+      "file": "10-sao-chep-link.png",
+      "capturedAt": "2026-09-10T14:07:51.474Z",
+      "expected": "Clipboard đọc lại được: https://drive.google.com/drive/folders/1SG6SXFMgcmVBy-e9iFDv2uerzwdoDCgV · nhãn nút \"Đã sao chép\""
+    },
+    {
+      "file": "11-luu-lan-2-de-len-anh-cu.png",
+      "capturedAt": "2026-09-10T14:08:01.281Z",
+      "expected": "Lần 2 sau khi vẽ thêm: \"Đã lưu sổ \"SamNguyen 1\": 0 trang mới, 1 trang cập nhật, 1 trang không đổi.\""
+    },
+    {
+      "file": "12-dang-xuat.png",
+      "capturedAt": "2026-09-10T14:08:02.806Z",
+      "expected": "Đăng xuất về /dang-nhap, gọi lại /board.html trả HTTP 0"
+    }
+  ]
+}

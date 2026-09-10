@@ -1,0 +1,33 @@
+[Unit]
+Description=Sam Teaching Visual static server (day.samnguyenphoto.com)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/srv/day.samnguyenphoto.com
+Environment=PORT=4890
+Environment=NODE_ENV=production
+Environment=SAM_DRIVE_PARENT=1SLTqn92hitLfiDY_t5cWre6mlc-At3rC
+Environment=SAM_DRIVE_FOLDER=_VeBangDayHoc
+Environment=SAM_DRIVE_TOKEN=/var/www/learn-superapp/apps/crm/crm-backend/src/config/google-token.json
+Environment=SAM_DRIVE_CREDENTIALS=/var/www/learn-superapp/apps/crm/crm-backend/src/config/google-credentials.json
+Environment=SAM_DATA_DIR=/srv/day.samnguyenphoto.com/du-lieu
+EnvironmentFile=/etc/sam-teaching-visual-day.env
+ExecStart=/usr/bin/node scripts/serve.mjs --dist
+Restart=always
+RestartSec=3
+
+# Hardening / sandbox
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/srv/day.samnguyenphoto.com
+
+# Logging
+StandardOutput=append:/var/log/sam-teaching-visual-day.log
+StandardError=append:/var/log/sam-teaching-visual-day.log
+
+[Install]
+WantedBy=multi-user.target

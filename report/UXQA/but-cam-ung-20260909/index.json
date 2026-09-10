@@ -1,0 +1,107 @@
+{
+  "base": "https://day.samnguyenphoto.com",
+  "capturedAt": "2026-09-09T02:10:26.968Z",
+  "gioiHan": "Sự kiện cảm ứng/bút do CDP tổng hợp. Chứng minh đường Pointer Events của trang xử lý đúng pointerType touch/pen, KHÔNG thay được bút số hoá thật (đường cong lực nhấn phần cứng, chống kê tay ở tầng driver, Safari trên iPad).",
+  "problems": [],
+  "measurements": {
+    "canvasInfo": {
+      "touchAction": "none",
+      "overscroll": "none",
+      "canvasPixels": "780x1688",
+      "dpr": 2,
+      "maxTouchPoints": 5
+    },
+    "touch": {
+      "litBefore": 0,
+      "litTouch": 5373,
+      "soNet": 1
+    },
+    "scrolled": {
+      "scrollY": 0,
+      "scrollTop": 0,
+      "bodyTop": 0
+    },
+    "mepTrenThanhCongCu": 590,
+    "pen": {
+      "litPen": 10035,
+      "soNet": 2,
+      "loaiConTro": [
+        {
+          "loai": "touch",
+          "luc": 0.6000000238418579,
+          "nghieng": [
+            0,
+            0
+          ]
+        },
+        {
+          "loai": "pen",
+          "luc": 0.75,
+          "nghieng": [
+            12,
+            -8
+          ]
+        }
+      ]
+    },
+    "keTay": {
+      "truocKeTay": 2,
+      "sauKeTay": 3,
+      "litTruocKeTay": 10035,
+      "litSauKeTay": 14077
+    },
+    "tay": {
+      "litSauTay": 8712,
+      "soNetSauTay": 2
+    },
+    "chamNut": {
+      "hopAnUi": {
+        "x": 218,
+        "y": 757
+      },
+      "hopPill": {
+        "x": 354,
+        "y": 808
+      },
+      "daAn": "0",
+      "daMoLai": "1"
+    }
+  },
+  "shots": [
+    {
+      "file": "01-mobile-bang-trong.png",
+      "capturedAt": "2026-09-09T02:10:18.871Z",
+      "expected": "Bảng trống 390x844, dpr=2, canvas 780x1688, touch-action=none"
+    },
+    {
+      "file": "02-ve-bang-ngon-tay.png",
+      "capturedAt": "2026-09-09T02:10:20.299Z",
+      "expected": "Nét vẽ bằng ngón tay, pixel sáng 0 -> 5373, số nét 1"
+    },
+    {
+      "file": "03-ve-bang-but.png",
+      "capturedAt": "2026-09-09T02:10:21.666Z",
+      "expected": "Nét bút màu vàng, pixel sáng 5373 -> 10035, pointerType nhận được: touch, pen, lực nhấn bút 0.75"
+    },
+    {
+      "file": "04-ke-tay-viet-but.png",
+      "capturedAt": "2026-09-09T02:10:23.982Z",
+      "expected": "Kê bàn tay (bán kính 46) rồi viết bút: số nét 2 -> 3, pixel sáng 10035 -> 14077"
+    },
+    {
+      "file": "05-tay-bang-ngon-tay.png",
+      "capturedAt": "2026-09-09T02:10:25.347Z",
+      "expected": "Tẩy bằng ngón tay: số nét 3 -> 2, pixel sáng 8712"
+    },
+    {
+      "file": "06-cham-an-thanh-cong-cu.png",
+      "capturedAt": "2026-09-09T02:10:26.154Z",
+      "expected": "Chạm ngón tay tại (218,757) đã ẩn UI, chỉ còn pill mở lại"
+    },
+    {
+      "file": "07-cham-pill-mo-lai.png",
+      "capturedAt": "2026-09-09T02:10:26.968Z",
+      "expected": "Chạm pill tại (354,808) đã mở lại thanh công cụ, opacity=1"
+    }
+  ]
+}

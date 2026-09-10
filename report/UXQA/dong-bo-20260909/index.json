@@ -1,0 +1,179 @@
+{
+  "base": "https://day.samnguyenphoto.com",
+  "tenMayA": "MayA gm21b",
+  "tenMayB": "MayB gm21b",
+  "capturedAt": "2026-09-09T02:09:15.835Z",
+  "problems": [],
+  "measurements": {
+    "thanhSoLucMo": {
+      "barOpacity": "0",
+      "nutHien": true,
+      "nutRong": 44,
+      "nutCao": 40,
+      "nutTrongThanhCongCu": true,
+      "nhan": "📓"
+    },
+    "thanhSoSauBam": {
+      "barOpacity": "1",
+      "chu": "📓 SamNguyen 1 Đã đồng bộ 09:08",
+      "nutActive": true
+    },
+    "thanhSoAnLai": "0",
+    "trangThaiA": {
+      "trangThai": "xong",
+      "chu": "Đã đồng bộ 09:08Đã đồng bộ"
+    },
+    "soBanDau": [
+      "SamNguyen 1"
+    ],
+    "mayA": {
+      "tenSo": "MayA gm21b",
+      "lit": 7291,
+      "sauDongBo": {
+        "trangThai": "xong",
+        "chu": "Đã đồng bộ 09:08Đã đồng bộ"
+      }
+    },
+    "mayB": {
+      "danhSachSo": [
+        "MayA gm21b",
+        "SamNguyen 1"
+      ],
+      "trangThai": {
+        "trangThai": "xong",
+        "chu": "Đã đồng bộ 09:08Đã đồng bộ"
+      }
+    },
+    "netCuaAtrenB": {
+      "lit": 7291,
+      "chenhLech": 0
+    },
+    "soRiengB": {
+      "ten": "MayB gm21b",
+      "lit": 6377
+    },
+    "soTrenA": [
+      "MayA gm21b",
+      "SamNguyen 1",
+      "MayB gm21b"
+    ],
+    "suaChung": {
+      "litA2": 13111,
+      "litBsauA2": 13107
+    },
+    "sauXoa": {
+      "soTrenBsauXoa": [
+        "MayA gm21b",
+        "SamNguyen 1"
+      ]
+    },
+    "offline": {
+      "litAoffline": 18435,
+      "trangThaiOffline": {
+        "trangThai": "loi",
+        "chu": "Chưa đồng bộ — sẽ thử lạiChưa đồng bộ"
+      }
+    },
+    "online": {
+      "trangThaiOnline": {
+        "trangThai": "xong",
+        "chu": "Đã đồng bộ 09:09Đã đồng bộ"
+      },
+      "litAsauOnline": 18435
+    },
+    "litBcuoi": 18435,
+    "soRac": {
+      "soBanDau": [
+        "SamNguyen 1"
+      ],
+      "soCuoi": [
+        "MayA gm21b",
+        "SamNguyen 1"
+      ],
+      "phatSinh": [
+        "MayA gm21b"
+      ],
+      "rac": []
+    }
+  },
+  "shots": [
+    {
+      "file": "00a-thanh-so-an-mac-dinh.png",
+      "may": "Máy A",
+      "capturedAt": "2026-09-09T02:08:44.941Z",
+      "expected": "Mở lên: thanh sổ ẩn (opacity 0), chỉ còn nút nhỏ \"📓\" 44x40 trong thanh công cụ"
+    },
+    {
+      "file": "00b-bam-nut-nho-thanh-so-hien.png",
+      "may": "Máy A",
+      "capturedAt": "2026-09-09T02:08:45.521Z",
+      "expected": "Bấm nút nhỏ: thanh sổ hiện, đọc được \"📓 SamNguyen 1 Đã đồng bộ 09:08\""
+    },
+    {
+      "file": "01-may-a-ve-va-dong-bo.png",
+      "may": "Máy A",
+      "capturedAt": "2026-09-09T02:08:50.114Z",
+      "expected": "Máy A: sổ \"MayA gm21b\", pixel sáng 7291, trạng thái \"Đã đồng bộ 09:08Đã đồng bộ\""
+    },
+    {
+      "file": "02-may-b-thay-so-cua-may-a.png",
+      "may": "Máy B",
+      "capturedAt": "2026-09-09T02:08:54.602Z",
+      "expected": "Máy B (profile riêng) thấy: MayA gm21b | SamNguyen 1"
+    },
+    {
+      "file": "03-may-b-mo-so-cua-may-a.png",
+      "may": "Máy B",
+      "capturedAt": "2026-09-09T02:08:55.922Z",
+      "expected": "Máy B mở sổ \"MayA gm21b\", pixel sáng 7291 (máy A là 7291)"
+    },
+    {
+      "file": "04-may-b-tao-so-rieng.png",
+      "may": "Máy B",
+      "capturedAt": "2026-09-09T02:08:58.271Z",
+      "expected": "Máy B tạo sổ \"MayB gm21b\", pixel sáng 6377"
+    },
+    {
+      "file": "05-may-a-nhan-so-cua-may-b.png",
+      "may": "Máy A",
+      "capturedAt": "2026-09-09T02:08:59.996Z",
+      "expected": "Máy A sau đồng bộ thấy: MayA gm21b | SamNguyen 1 | MayB gm21b"
+    },
+    {
+      "file": "06-may-b-nhan-net-moi-cua-may-a.png",
+      "may": "Máy B",
+      "capturedAt": "2026-09-09T02:09:04.047Z",
+      "expected": "Máy B nhận nét mới máy A vừa vẽ: 13107 pixel sáng (máy A 13111)"
+    },
+    {
+      "file": "07-xoa-tren-may-a-lan-sang-may-b.png",
+      "may": "Máy B",
+      "capturedAt": "2026-09-09T02:09:08.057Z",
+      "expected": "Sau khi máy A xoá \"MayB gm21b\", máy B thấy: MayA gm21b | SamNguyen 1"
+    },
+    {
+      "file": "08-mat-mang-van-ve-duoc.png",
+      "may": "Máy A",
+      "capturedAt": "2026-09-09T02:09:11.288Z",
+      "expected": "Mất mạng: vẫn vẽ được (18435 pixel sáng), trạng thái \"Chưa đồng bộ — sẽ thử lạiChưa đồng bộ\""
+    },
+    {
+      "file": "09-co-mang-lai-dong-bo-duoc.png",
+      "may": "Máy A",
+      "capturedAt": "2026-09-09T02:09:12.689Z",
+      "expected": "Có mạng lại: \"Đã đồng bộ 09:09Đã đồng bộ\", nét offline còn nguyên (18435 pixel sáng)"
+    },
+    {
+      "file": "10-may-b-nhan-net-ve-luc-mat-mang.png",
+      "may": "Máy B",
+      "capturedAt": "2026-09-09T02:09:14.087Z",
+      "expected": "Máy B nhận nét máy A vẽ lúc mất mạng: 18435 pixel sáng (máy A 18435)"
+    },
+    {
+      "file": "11-khong-de-ra-so-rac.png",
+      "may": "Máy A",
+      "capturedAt": "2026-09-09T02:09:15.835Z",
+      "expected": "Trước: 1 sổ · sau: 2 sổ · phát sinh: MayA gm21b"
+    }
+  ]
+}

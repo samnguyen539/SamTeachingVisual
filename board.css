@@ -1,0 +1,1058 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  overscroll-behavior: none;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+  color: #f3f4f6;
+  -webkit-font-smoothing: antialiased;
+}
+
+#boardCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  background: #000;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+#boardHint {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 8px 16px;
+  background: rgba(20, 20, 24, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  color: #e5e7eb;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 5;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  animation: fadeOutHint 6s forwards;
+}
+
+@keyframes fadeOutHint {
+  0%, 70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+#boardToolbar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(20, 20, 22, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  max-width: calc(100vw - 24px);
+  overflow-x: auto;
+  scrollbar-width: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#boardToolbar::-webkit-scrollbar {
+  display: none;
+}
+
+#boardToolbar.ui-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 120%);
+}
+
+#boardHint.ui-hidden {
+  /* Animation thắng khai báo thường, nên không tắt `animation` thì `opacity: 0`
+     ở đây vô hiệu và dòng gợi ý vẫn hiện khi đã ẩn UI. Đo được 0.55 trên UI thật. */
+  animation: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+}
+
+.tool-btn,
+.action-btn {
+  height: 40px;
+  min-width: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f3f4f6;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  user-select: none;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.tool-btn:hover,
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.tool-btn:active,
+.action-btn:active {
+  transform: scale(0.97);
+}
+
+.tool-btn.active {
+  background: rgba(255, 255, 255, 0.24);
+  border-color: #ffffff;
+  color: #ffffff;
+  box-shadow: 0 0 0 1px #ffffff;
+}
+
+.action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.action-btn:disabled:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.logout-btn {
+  color: #ff8787;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 107, 107, 0.2);
+  border-color: rgba(255, 107, 107, 0.4);
+}
+
+.swatches {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+}
+
+.swatch {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--swatch-color, #ffffff);
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.swatch:hover {
+  transform: scale(1.1);
+}
+
+.swatch.active {
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3px rgba(0, 0, 0, 0.8);
+  transform: scale(1.05);
+}
+
+.width-label {
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+}
+
+#widthRange {
+  width: 80px;
+  height: 6px;
+  accent-color: #ffd43b;
+  cursor: pointer;
+}
+
+.studio-link {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: transparent;
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.studio-link:hover {
+  color: #f3f4f6;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.restore-btn {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(20, 20, 22, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #f3f4f6;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  z-index: 11;
+  opacity: 0.8;
+  transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.restore-btn:hover,
+.restore-btn:focus-visible {
+  opacity: 1;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Sam từng không tìm ra cách mở lại thanh công cụ, nên lúc pill vừa xuất hiện
+   cho nó nháy viền 3 nhịp. Chỉ chạm box-shadow/border, KHÔNG chạm opacity —
+   test UI đo opacity của nút này. */
+.restore-btn:not(.ui-hidden) {
+  animation: nhayNutMoLai 1.1s ease-out 3;
+}
+
+@keyframes nhayNutMoLai {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 212, 59, 0);
+    border-color: rgba(255, 255, 255, 0.35);
+  }
+  45% {
+    box-shadow: 0 0 0 8px rgba(255, 212, 59, 0.22);
+    border-color: rgba(255, 212, 59, 0.85);
+  }
+}
+
+.restore-btn.ui-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.9);
+}
+
+.restore-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.restore-text {
+  white-space: nowrap;
+}
+
+.page-bar {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(20, 20, 22, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 9999px;
+  padding: 4px 8px;
+  z-index: 12;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  color: #f3f4f6;
+}
+
+.page-bar.ui-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-100%);
+}
+
+.notebook-bar {
+  position: fixed;
+  top: 14px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(20, 20, 22, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 9999px;
+  padding: 4px 8px;
+  z-index: 12;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  color: #f3f4f6;
+}
+
+.notebook-bar.ui-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-100%);
+}
+
+/* Nút nhỏ dưới thanh công cụ để hiện/ẩn tên sổ và trạng thái đồng bộ.
+   Mặc định thanh sổ ẩn cho sạch màn hình khi quay. */
+.notebook-toggle-btn {
+  min-width: 44px;
+  padding: 0 10px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.notebook-toggle-btn.active {
+  border-color: rgba(255, 212, 59, 0.85);
+  background: rgba(255, 212, 59, 0.18);
+}
+
+.notebook-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #f3f4f6;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  height: 28px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.notebook-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.notebook-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.notebook-name {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.sync-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  height: 28px;
+  user-select: none;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.sync-dot {
+  width: 7px;
+  height: 7px;
+  min-width: 7px;
+  min-height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.2s ease;
+}
+
+.sync-text-short {
+  display: none;
+}
+
+.sync-text-full {
+  display: inline;
+}
+
+.sync-status[data-trang-thai="dang"] {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.25);
+  color: #7dd3fc;
+}
+.sync-status[data-trang-thai="dang"] .sync-dot {
+  background: #38bdf8;
+  box-shadow: 0 0 6px #38bdf8;
+  animation: nhayDongBo 1s infinite alternate;
+}
+
+.sync-status[data-trang-thai="xong"] {
+  background: rgba(74, 222, 128, 0.12);
+  border-color: rgba(74, 222, 128, 0.25);
+  color: #86efac;
+}
+.sync-status[data-trang-thai="xong"] .sync-dot {
+  background: #4ade80;
+}
+
+.sync-status[data-trang-thai="loi"] {
+  background: rgba(251, 191, 36, 0.12);
+  border-color: rgba(251, 191, 36, 0.25);
+  color: #fde047;
+}
+.sync-status[data-trang-thai="loi"] .sync-dot {
+  background: #f59e0b;
+}
+
+.sync-status[data-trang-thai="hethan"] {
+  background: rgba(248, 113, 113, 0.15);
+  border-color: rgba(248, 113, 113, 0.3);
+  color: #fca5a5;
+  cursor: pointer;
+}
+.sync-status[data-trang-thai="hethan"] .sync-dot {
+  background: #ef4444;
+}
+
+@keyframes nhayDongBo {
+  0% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+.page-btn {
+  height: 32px;
+  min-width: 32px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f3f4f6;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease, border-color 0.15s ease;
+}
+
+.page-btn:hover:not(:disabled),
+.page-btn:focus-visible:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.page-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.page-label {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 0 6px;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.page-btn.add-btn {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.page-btn.pages-btn {
+  padding: 0 10px;
+}
+
+.page-overview {
+  position: fixed;
+  inset: 0;
+  /* .92 vẫn để lộ nét vẽ và thanh công cụ phía sau — đo trên ảnh chụp thật. */
+  background: rgba(0, 0, 0, 0.97);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  overflow-y: auto;
+  color: #f3f4f6;
+}
+
+.page-overview.ui-hidden {
+  display: none;
+}
+
+.overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto 20px;
+}
+
+.overview-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.overview-close-btn {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.overview-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.overview-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.overview-add-btn {
+  background: rgba(77, 212, 255, 0.2);
+  color: #8be0ff;
+  border: 1px solid rgba(77, 212, 255, 0.4);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  height: 36px;
+}
+
+.overview-add-btn:hover {
+  background: rgba(77, 212, 255, 0.3);
+  border-color: #8be0ff;
+}
+
+.notebook-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.notebook-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(30, 30, 34, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 12px 16px;
+  gap: 16px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.notebook-item:hover {
+  background: rgba(40, 40, 46, 0.9);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.notebook-item.active {
+  border-color: #ffd43b;
+  background: rgba(255, 212, 59, 0.08);
+  box-shadow: 0 0 0 1px #ffd43b;
+}
+
+.notebook-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.notebook-item-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.notebook-item-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #f3f4f6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notebook-item-meta {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.notebook-item-drive {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #69db7c;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.copy-link-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.copy-link-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.drive-link {
+  color: #8be0ff;
+  text-decoration: underline;
+  font-size: 11px;
+}
+
+.drive-link:hover {
+  color: #bbf0ff;
+}
+
+.notebook-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.nb-action-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f3f4f6;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nb-action-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.nb-action-btn.nb-delete-btn:hover {
+  background: rgba(255, 107, 107, 0.25);
+  border-color: #ff6b6b;
+  color: #ff8787;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.page-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.page-card:hover {
+  border-color: #4dd4ff;
+  transform: translateY(-2px);
+}
+
+.page-card.active {
+  border-color: #ffd43b;
+  box-shadow: 0 0 0 1px #ffd43b;
+}
+
+.card-thumb-wrap {
+  width: 100%;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-thumb {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.card-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.card-title {
+  font-weight: 600;
+  color: #fff;
+}
+
+.card-subtitle {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.card-delete-btn {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 107, 107, 0.4);
+  background: rgba(255, 107, 107, 0.15);
+  color: #ff8787;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.card-delete-btn:hover {
+  background: rgba(255, 107, 107, 0.3);
+}
+
+.board-toast {
+  position: fixed;
+  /* Toolbar cao ~48px và cách đáy 20px; để 24px là toast đè lên chính các nút
+     vừa bấm — đo được trên ảnh chụp thật. */
+  bottom: 88px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 20, 24, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #f3f4f6;
+  z-index: 60;
+  max-width: min(90vw, 640px);
+  font-size: 13px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.board-toast.ui-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 20px);
+}
+
+.board-toast.toast-error {
+  border-color: rgba(255, 107, 107, 0.6);
+  background: rgba(40, 16, 16, 0.95);
+}
+
+@media (max-width: 720px) {
+  .board-toast {
+    /* Thanh công cụ trên điện thoại xếp 3 hàng nên phải nhấc toast lên cao hơn. */
+    bottom: 180px;
+    max-width: calc(100vw - 24px);
+  }
+}
+
+.toast-message {
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.toast-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.toast-link {
+  color: #4dd4ff;
+  text-decoration: underline;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.toast-link:hover {
+  color: #8be0ff;
+}
+
+.toast-btn {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.toast-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.toast-close-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-close-btn:hover {
+  color: #fff;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 1360px) {
+  #boardHint {
+    top: 58px;
+  }
+}
+
+@media (max-width: 720px) {
+  #boardHint {
+    width: calc(100vw - 28px);
+    max-width: calc(100vw - 28px);
+    white-space: normal;
+    text-align: center;
+    line-height: 1.35;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 12px;
+    /* Trên điện thoại ba thanh xếp chồng theo hàng: sổ (8px) → trang (56px) →
+       gợi ý (106px). Để chung một hàng thì thanh sổ đè thanh trang 9px — đo
+       được trên 390x844 và bị bộ smoke chặn. */
+    top: 106px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  #boardHint.ui-hidden {
+    animation: none;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translate(-50%, -100%);
+  }
+  #boardToolbar {
+    width: calc(100vw - 20px);
+    max-width: calc(100vw - 20px);
+    flex-wrap: wrap;
+    justify-content: center;
+    overflow: visible;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 12px;
+    padding: 8px 6px;
+    gap: 6px;
+    row-gap: 6px;
+    column-gap: 6px;
+  }
+  #boardToolbar.ui-hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 120%);
+  }
+  .tool-btn,
+  .action-btn,
+  .studio-link {
+    height: 40px;
+    min-width: 36px;
+    padding: 0 8px;
+    font-size: 12px;
+  }
+
+  .swatches {
+    gap: 5px;
+    padding: 0 2px;
+  }
+
+  .swatch {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: 6px;
+  }
+
+  .width-label {
+    padding: 0 2px;
+  }
+
+  #widthRange {
+    width: 60px;
+  }
+
+  .restore-btn {
+    padding: 0 12px;
+    height: 40px;
+    min-width: 40px;
+    justify-content: center;
+  }
+  .restore-text {
+    display: none;
+  }
+  .page-bar {
+    top: 56px;
+    right: 8px;
+    gap: 4px;
+    padding: 3px 6px;
+  }
+  .page-btn {
+    /* 28px quá nhỏ để bấm bằng ngón tay — đo được trên 390x844 và bị chặn. */
+    height: 36px;
+    min-width: 36px;
+    padding: 0 8px;
+    font-size: 12px;
+  }
+  .page-label {
+    font-size: 12px;
+    padding: 0 3px;
+  }
+  .overview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .notebook-bar {
+    top: 8px;
+    left: 8px;
+    gap: 4px;
+    padding: 3px 6px;
+    max-height: 42px;
+    align-items: center;
+    max-width: calc(100vw - 16px);
+  }
+  .notebook-btn {
+    height: 36px;
+    padding: 0 6px;
+    font-size: 12px;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+  .notebook-name {
+    max-width: calc(100vw - 210px);
+  }
+  .sync-status {
+    height: 32px;
+    padding: 2px 6px;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .sync-text-full {
+    display: none;
+  }
+  .sync-text-short {
+    display: inline;
+  }
+}
+
+@media (max-width: 380px) {
+  .notebook-name {
+    max-width: calc(100vw - 190px);
+  }
+  .page-bar {
+    gap: 2px;
+    padding: 3px 4px;
+  }
+  .page-btn {
+    padding: 0 4px;
+  }
+}
